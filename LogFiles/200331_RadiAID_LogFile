@@ -1,0 +1,198 @@
+00:02:09,429 root INFO ========== GUI STARTED ==============
+00:02:09,429 root INFO Propper Logger installed.
+00:02:09,430 root INFO Radiography class successfully initialized
+00:02:09,438 root DEBUG Table Status WatchDog initialized
+00:02:09,438 root DEBUG Motor functionality set up successfully
+00:02:09,439 root INFO Table Status WatchDog awake
+00:02:18,44 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:02:23,350 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:02:23,437 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:02:25,874 root INFO Isocenter coordinates confirmed
+00:03:27,718 root INFO ++++++++ GUI closed ++++++++++++
+00:03:30,624 root INFO ========== GUI STARTED ==============
+00:03:30,625 root INFO Propper Logger installed.
+00:03:30,626 root INFO Radiography class successfully initialized
+00:03:30,638 root DEBUG Table Status WatchDog initialized
+00:03:30,639 root DEBUG Motor functionality set up successfully
+00:03:30,639 root INFO Table Status WatchDog awake
+00:03:35,417 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:03:37,762 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:03:37,851 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:03:38,800 root INFO Isocenter coordinates confirmed
+00:05:08,974 root INFO ++++++++ GUI closed ++++++++++++
+00:05:12,633 root INFO ========== GUI STARTED ==============
+00:05:12,633 root INFO Propper Logger installed.
+00:05:12,634 root INFO Radiography class successfully initialized
+00:05:12,644 root DEBUG Table Status WatchDog initialized
+00:05:12,645 root DEBUG Motor functionality set up successfully
+00:05:12,646 root INFO Table Status WatchDog awake
+00:05:15,854 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:05:18,549 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:05:18,640 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:05:19,560 root INFO Isocenter coordinates confirmed
+00:06:23,803 root INFO ++++++++ GUI closed ++++++++++++
+00:06:29,716 root INFO ========== GUI STARTED ==============
+00:06:29,717 root INFO Propper Logger installed.
+00:06:29,719 root INFO Radiography class successfully initialized
+00:06:29,738 root DEBUG Table Status WatchDog initialized
+00:06:29,739 root DEBUG Motor functionality set up successfully
+00:06:29,740 root INFO Table Status WatchDog awake
+00:06:39,51 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:06:47,40 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:06:47,174 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:06:48,164 root INFO Isocenter coordinates confirmed
+00:07:24,58 root INFO ++++++++ GUI closed ++++++++++++
+00:07:27,319 root INFO ========== GUI STARTED ==============
+00:07:27,321 root INFO Propper Logger installed.
+00:07:27,323 root INFO Radiography class successfully initialized
+00:07:27,346 root DEBUG Table Status WatchDog initialized
+00:07:27,347 root DEBUG Motor functionality set up successfully
+00:07:27,348 root INFO Table Status WatchDog awake
+00:07:35,204 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:07:50,187 root INFO ========== GUI STARTED ==============
+00:07:50,187 root INFO Propper Logger installed.
+00:07:50,188 root INFO Radiography class successfully initialized
+00:07:50,205 root DEBUG Table Status WatchDog initialized
+00:07:50,205 root DEBUG Motor functionality set up successfully
+00:07:50,205 root INFO Table Status WatchDog awake
+00:08:07,511 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:08:14,747 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:08:14,888 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:08:16,67 root INFO Isocenter coordinates confirmed
+00:09:37,263 root INFO ++++++++ GUI closed ++++++++++++
+00:10:22,570 root INFO ========== GUI STARTED ==============
+00:10:22,571 root INFO Propper Logger installed.
+00:10:22,571 root INFO Radiography class successfully initialized
+00:10:22,589 root DEBUG Table Status WatchDog initialized
+00:10:22,589 root DEBUG Motor functionality set up successfully
+00:10:22,589 root INFO Table Status WatchDog awake
+00:10:32,685 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:10:39,55 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:10:39,194 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:10:40,60 root INFO Isocenter coordinates confirmed
+00:12:02,112 root INFO ++++++++ GUI closed ++++++++++++
+00:12:19,912 root INFO ========== GUI STARTED ==============
+00:12:19,912 root INFO Propper Logger installed.
+00:12:19,913 root INFO Radiography class successfully initialized
+00:12:19,920 root DEBUG Table Status WatchDog initialized
+00:12:19,920 root DEBUG Motor functionality set up successfully
+00:12:19,920 root INFO Table Status WatchDog awake
+00:12:24,730 root INFO ++++++++ GUI closed ++++++++++++
+00:12:32,105 root INFO ========== GUI STARTED ==============
+00:12:32,106 root INFO Propper Logger installed.
+00:12:32,107 root INFO Radiography class successfully initialized
+00:12:32,132 root DEBUG Table Status WatchDog initialized
+00:12:32,133 root DEBUG Motor functionality set up successfully
+00:12:32,133 root INFO Table Status WatchDog awake
+00:12:39,908 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:12:49,94 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:12:49,243 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:12:50,183 root INFO Isocenter coordinates confirmed
+00:13:55,289 root INFO ++++++++ GUI closed ++++++++++++
+00:16:04,929 root INFO ========== GUI STARTED ==============
+00:16:16,127 root INFO ========== GUI STARTED ==============
+00:16:16,127 root INFO Propper Logger installed.
+00:16:16,128 root INFO Radiography class successfully initialized
+00:16:16,135 root DEBUG Table Status WatchDog initialized
+00:16:16,136 root DEBUG Motor functionality set up successfully
+00:16:16,136 root INFO Table Status WatchDog awake
+00:16:21,955 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:16:24,403 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:16:24,492 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:16:25,280 root INFO Isocenter coordinates confirmed
+00:17:09,285 root INFO ++++++++ GUI closed ++++++++++++
+00:21:20,760 root INFO ========== GUI STARTED ==============
+00:21:20,761 root INFO Propper Logger installed.
+00:21:20,762 root INFO Radiography class successfully initialized
+00:21:20,774 root DEBUG Table Status WatchDog initialized
+00:21:20,774 root DEBUG Motor functionality set up successfully
+00:21:20,775 root INFO Table Status WatchDog awake
+00:21:24,398 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:21:26,920 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:21:27,4 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:21:27,843 root INFO Isocenter coordinates confirmed
+00:25:54,887 root INFO ++++++++ GUI closed ++++++++++++
+00:26:01,248 root INFO ========== GUI STARTED ==============
+00:26:01,249 root INFO Propper Logger installed.
+00:26:01,249 root INFO Radiography class successfully initialized
+00:26:01,256 root DEBUG Table Status WatchDog initialized
+00:26:01,257 root DEBUG Motor functionality set up successfully
+00:26:01,257 root INFO Table Status WatchDog awake
+00:26:06,234 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:26:08,749 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:26:08,841 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:26:09,595 root INFO Isocenter coordinates confirmed
+00:26:14,115 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+00:26:15,589 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+00:26:18,90 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+00:26:18,173 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+00:26:19,269 root INFO Coordinates of Radiography landmarks confirmed
+00:28:07,532 root INFO ++++++++ GUI closed ++++++++++++
+00:28:16,699 root INFO ========== GUI STARTED ==============
+00:28:16,699 root INFO Propper Logger installed.
+00:28:16,699 root INFO Radiography class successfully initialized
+00:28:16,706 root DEBUG Table Status WatchDog initialized
+00:28:16,706 root DEBUG Motor functionality set up successfully
+00:28:16,706 root INFO Table Status WatchDog awake
+00:28:22,909 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:28:25,69 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:28:25,156 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:28:25,978 root INFO Isocenter coordinates confirmed
+00:28:30,144 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+00:28:31,546 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+00:28:33,812 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+00:28:33,900 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+00:28:35,49 root INFO Coordinates of Radiography landmarks confirmed
+00:28:52,5 root INFO ++++++++ GUI closed ++++++++++++
+00:46:23,939 root INFO ========== GUI STARTED ==============
+00:46:23,940 root INFO Propper Logger installed.
+00:46:23,941 root INFO Radiography class successfully initialized
+00:46:23,953 root DEBUG Table Status WatchDog initialized
+00:46:23,954 root DEBUG Motor functionality set up successfully
+00:46:23,954 root INFO Table Status WatchDog awake
+00:46:27,888 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:46:30,743 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:46:30,832 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:48:05,612 root INFO ++++++++ GUI closed ++++++++++++
+00:48:19,649 root INFO ========== GUI STARTED ==============
+00:48:19,651 root INFO Propper Logger installed.
+00:48:19,652 root INFO Radiography class successfully initialized
+00:48:19,681 root DEBUG Table Status WatchDog initialized
+00:48:19,682 root DEBUG Motor functionality set up successfully
+00:48:19,682 root INFO Table Status WatchDog awake
+00:48:28,170 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:48:34,744 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:48:34,878 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:49:44,972 root INFO ++++++++ GUI closed ++++++++++++
+00:49:52,668 root INFO ========== GUI STARTED ==============
+00:49:52,668 root INFO Propper Logger installed.
+00:49:52,669 root INFO Radiography class successfully initialized
+00:49:52,690 root DEBUG Table Status WatchDog initialized
+00:49:52,691 root DEBUG Motor functionality set up successfully
+00:49:52,691 root INFO Table Status WatchDog awake
+00:50:03,333 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:50:08,502 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:50:08,644 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:50:58,594 root INFO Isocenter coordinates confirmed
+00:51:27,721 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+00:51:29,124 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+00:51:32,890 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+00:51:33,29 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+00:52:02,770 root INFO Coordinates of Radiography landmarks confirmed
+00:52:24,412 root INFO ++++++++ GUI closed ++++++++++++
+00:53:07,160 root INFO ========== GUI STARTED ==============
+00:53:07,161 root INFO Propper Logger installed.
+00:53:07,162 root INFO Radiography class successfully initialized
+00:53:07,171 root DEBUG Table Status WatchDog initialized
+00:53:07,171 root DEBUG Motor functionality set up successfully
+00:53:07,172 root INFO Table Status WatchDog awake
+00:53:11,380 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+00:53:13,553 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+00:53:13,638 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+00:53:14,357 root INFO Isocenter coordinates confirmed
+00:53:26,230 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+00:53:27,549 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+00:53:29,765 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+00:53:29,851 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+00:53:30,871 root INFO Coordinates of Radiography landmarks confirmed
+00:56:47,35 root INFO ++++++++ GUI closed ++++++++++++

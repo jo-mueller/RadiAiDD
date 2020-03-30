@@ -39,6 +39,8 @@ class Lynx(object):
         self.dataOK = False
         self.MUcorr = False
         self.data   =  []
+        self.dcmDat = None
+        self.filename = None
         
         self.xrange = [-np.inf,  np.inf]
         self.yrange = [-np.inf, np.inf]
@@ -256,7 +258,7 @@ class Crosshair:
               circle = False):
         
         # get input and save to internal namespace
-        self.canvas     = canvas
+        self.canvas     = canvas 
         self.size       = size
         self.color      = color
         self.zorder     = zorder
@@ -269,12 +271,12 @@ class Crosshair:
         #create lines
         self.horizontalLine = Line2D([ self.x - self.size, self.x + self.size], 
                                      [ self.y, self.y],
-                linestyle =  '-', alpha = 0.5, linewidth = 1.5, 
-                color = color, zorder  = zorder)
+                                     linestyle =  '-', alpha = 0.5, linewidth = 1.5, 
+                                     color = color, zorder  = zorder)
         self.verticalLine = Line2D([self.x, self.x], 
                                    [self.y - self.size, self.y + self.size],
-                linestyle =  '-', alpha = 0.5, linewidth = 1.5, 
-                color = color, zorder = zorder)
+                                   linestyle =  '-', alpha = 0.5, linewidth = 1.5, 
+                                   color = color, zorder = zorder)
         
         if self.circle:
             self.circularLine = Circle((self.x,self.y), self.size, fill = False,
@@ -313,12 +315,14 @@ class Crosshair:
         self.x += x
         self.y += y
         
-        if self.visible:
-            self.horizontalLine.set_data([self.x-self.size, self.x +self.size], [self.y, self.y])
-            self.verticalLine.set_data(  [self.x, self.x], [self.y -self.size, self.y+self.size])
-            if self.circle: 
-                self.circularLine.center = (x,y)
-                self.canvas.axes.add_patch(self.circularLine)
+        for canvas in self.canvases:
+        
+            if self.visible:
+                self.horizontalLine.set_data([self.x-self.size, self.x +self.size], [self.y, self.y])
+                self.verticalLine.set_data(  [self.x, self.x], [self.y -self.size, self.y+self.size])
+                if self.circle: 
+                    self.circularLine.center = (x,y)
+                    canvas.axes.add_patch(self.circularLine)
             
     def wipe(self):
         " Removes crosshair from whereever"

@@ -59,10 +59,10 @@ class Radiography(object):
             # Patient Positioning holds information about positioning of patient in CT
             self.PatientPosition = []
             
-            # Crosshairs
-            self.Crosshair_Landmark     = Crosshair()
-            self.Crosshair_IsoCenter    = Crosshair()
-            self.Crosshair_Target       = Crosshair()
+            # Crosshairs (two because two radiography images)
+            self.Crosshair_Landmark     = [Crosshair(), Crosshair()]
+            self.Crosshair_IsoCenter    = [Crosshair(), Crosshair()]
+            self.Crosshair_Target       = [Crosshair(), Crosshair()]
             
             # Flags for visibility SpotTxt_x
             self.crosshair = False
@@ -76,67 +76,66 @@ class Radiography(object):
             
             
             ## RADIOGRAPHY RELATED Buttons###        
-            GUI.Button_LoadRadiography.clicked.connect(self.loadRadiography)
             GUI.Button_RG_defineIsoCenter.clicked.connect(self.define_isocenter)
             GUI.Button_RadiographyLM.clicked.connect(self.define_landmarks)
             
     #        toggle visibility of isocenter crosshair in Radiography
-            GUI.Button_Radiograph_toggleIso.clicked.connect(self.Crosshair_IsoCenter.toggle)
+            GUI.Button_Radiograph_toggleIso.clicked.connect(self.toggleIso)
             
             # toggle visibility of landmark lines in Radiography
-            GUI.Button_toggleLandmarksRG.clicked.connect(self.Crosshair_Landmark.toggle)
+            GUI.Button_toggleLandmarksRG.clicked.connect(self.toggleLM)
             
             logging.info('Radiography class successfully initialized')
                                                             
         except Exception:
             logging.error('Radiography class could not be initialized')
     
-    def loadRadiography(self):
-        "load and display radiography image that contains the landmark (e.g. earpin)"
+    # def loadRadiography(self):
+    #     "load and display radiography image that contains the landmark (e.g. earpin)"
         
-        if Checklist.LandmarkRG:
+    #     if Checklist.LandmarkRG:
             
-            # If Landmarks were determined previously:
-            Hint = QMessage()
-            Hint.setIcon(QMessage.Information)
-            Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-            Hint.setText("Loading new Radiography will remove Landmark Definition. \n Proceed?")
-            proceed = Hint.exec_()
-            if proceed == QMessage.Ok:
-                #Remove all Landmark-related values/flags
-                if self.Crosshair_IsoCenter.visible: self.Crosshair_IsoCenter.toggle()
-                if self.Crosshair_Target.visible: self.Crosshair_Target.toggle()
-                self.Crosshair_Landmark.wipe()                    
-                GUI.TxtRGPinX.setText('')
-                GUI.TxtRGPinY.setText('')
-                GUI.TxtRGShiftX.setText('')
-                GUI.TxtRGShiftY.setText('')
-                GUI.TxtRG_pxcalc.setText('Pixel Spacing:')
-                Checklist.LandmarkRG = False
-            else: return 0
+    #         # If Landmarks were determined previously:
+    #         Hint = QMessage()
+    #         Hint.setIcon(QMessage.Information)
+    #         Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
+    #         Hint.setText("Loading new Radiography will remove Landmark Definition. \n Proceed?")
+    #         proceed = Hint.exec_()
+    #         if proceed == QMessage.Ok:
+    #             #Remove all Landmark-related values/flags
+    #             if self.Crosshair_IsoCenter.visible: self.Crosshair_IsoCenter.toggle()
+    #             if self.Crosshair_Target.visible: self.Crosshair_Target.toggle()
+    #             self.Crosshair_Landmark.wipe()                    
+    #             GUI.TxtRGPinX.setText('')
+    #             GUI.TxtRGPinY.setText('')
+    #             GUI.TxtRGShiftX.setText('')
+    #             GUI.TxtRGShiftY.setText('')
+    #             GUI.TxtRG_pxcalc.setText('Pixel Spacing:')
+    #             Checklist.LandmarkRG = False
+    #         else: return 0
             
-        # get filename from full path and display  
-        fname = Qfile.getOpenFileName(GUI, 'Open file', '\home\muellerjo',"Dicom files (*.dcm)")[0]
-        logging.info('Opened {:s} as landmark Image.'.format(fname))
-        _, filename = ntpath.split(fname)
-        GUI.Text_RG_Filename.setText(filename)
+    #     # get filename from full path and display  
+    #     fname = Qfile.getOpenFileName(GUI, 'Open file', '\home\muellerjo',"Dicom files (*.dcm)")[0]
+    #     logging.info('Opened {:s} as landmark Image.'.format(fname))
+    #     _, filename = ntpath.split(fname)
+    #     GUI.Text_RG_Filename.setText(filename)
         
-        # Load Radiography and display
-        self.Radiography_scatter.load(fname)  
+    #     # Load Radiography and display
+    #     self.Radiography_scatter.load(fname)  
         
-        # Prompt user to enter respective table coordinates            
-        self.gettablecoords()
+    #     # Prompt user to enter respective table coordinates            
+    #     self.gettablecoords()
         
-        # Cropping
-        x = [float(GUI.x_Left.text()), float(GUI.x_Right.text())]
-        y = [float(GUI.y_bottom.text()), float(GUI.y_top.text())]
+    #     # Cropping
+    #     x = [float(GUI.x_Left.text()), float(GUI.x_Right.text())]
+    #     y = [float(GUI.y_bottom.text()), float(GUI.y_top.text())]
         
-        # Crop image and update image
-        self.Radiography_scatter.crop(x,y)
-        GUI.Display_Radiography.canvas.axes.clear()
-        GUI.Display_Radiography.canvas.axes.imshow(self.Radiography_scatter.data, 
-            cmap = 'gray', zorder=1, origin = 'lower')        
-        GUI.Display_Radiography.canvas.draw()
+    #     # Crop image and update image
+    #     self.Radiography_scatter.crop(x,y)
+    #     GUI.Display_Radiography.canvas.axes.clear()
+    #     GUI.Display_Radiography.canvas.axes.imshow(self.Radiography_scatter.data, 
+    #         cmap = 'gray', zorder=1, origin = 'lower')        
+    #     GUI.Display_Radiography.canvas.draw()
 
     def gettablecoords(self):
         """Function that is called upon upload of radiography 
@@ -163,6 +162,28 @@ class Radiography(object):
         self.isocenter_window.show()
     
     def define_landmarks(self):
+        "start pipeline in open child window within which isocenter is defined"
+        
+        if Checklist.LandmarkRG:
+            # If Landmarks were determined previously:
+            Hint = QMessage()
+            Hint.setIcon(QMessage.Information)
+            Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
+            Hint.setText("Loading new Radiography will remove Landmark Definition. \n Proceed?")
+            proceed = Hint.exec_()
+            if proceed == QMessage.Ok:
+                #Remove all Landmark-related values/flags
+                if self.Crosshair_IsoCenter.visible: self.Crosshair_IsoCenter.toggle()
+                if self.Crosshair_Target.visible: self.Crosshair_Target.toggle()
+                self.Crosshair_Landmark.wipe()                    
+                GUI.TxtRGPinX.setText('')
+                GUI.TxtRGPinY.setText('')
+                GUI.TxtRGShiftX.setText('')
+                GUI.TxtRGShiftY.setText('')
+                GUI.TxtRG_pxcalc.setText('Pixel Spacing:')
+                Checklist.LandmarkRG = False
+            else: return 0
+            
         "start pipeline in open child window within which landmarks are defined"
         self.landmark_window = Landmark(GUI, self) # Pass Radiography data to child
         self.landmark_window.show()
@@ -220,22 +241,6 @@ class Radiography(object):
         GUI.TableTxt_xCorr.setStyleSheet("color: #b1b1b1; font-weight: bold;")
         GUI.TableTxt_yCorr.setStyleSheet("color: #b1b1b1; font-weight: bold;")
         
-
-                
-    def return_field(self, x, y):
-        """Function to be invoked from Main window that passes field limits
-        to Radiography handler"""
-
-        # Print results to GUI
-        GUI.x_Left.setText(str(x[0]))
-        GUI.x_Right.setText(str(x[1]))
-        GUI.y_bottom.setText(str(y[0]))
-        GUI.y_top.setText(str(y[1]))
-        
-        GUI.x_Left.setStyleSheet("color: #b1b1b1;")
-        GUI.x_Right.setStyleSheet("color: #b1b1b1;")
-        GUI.y_bottom.setStyleSheet("color: #b1b1b1;")
-        GUI.y_top.setStyleSheet("color: #b1b1b1;")
         
     def return_spacing(self, Spacing):
         " Function to be invoked from landmark child to pass spacing values"
@@ -248,18 +253,34 @@ class Radiography(object):
         GUI.TxtRG_pxcalc.setStyleSheet("color: #b1b1b1;")
     
         
-    def return_landmarks(self, X, Y):        
+    def return_landmarks(self, LynxObj, X, Y):        
         "Function to be invoked from child window that serves Landmark definition by earpin"
+        
+        # catch returned Image data
+        self.LandmarkRG = LynxObj
+        
         # Set GUI fields 
         GUI.TxtRGPinX.setText(str(X))
         GUI.TxtRGPinY.setText(str(Y))
         GUI.TxtRGPinX.setStyleSheet("color: #b1b1b1;")
         GUI.TxtRGPinY.setStyleSheet("color: #b1b1b1;")
+        GUI.Text_RG_Filename_Landmark.setText(self.LandmarkRG.filename)
         
         # Raise Flag in Checklist
         Checklist.LandmarkRG = True
-        self.Crosshair_Landmark.setup( GUI.Display_Radiography.canvas, size = 5, x = X ,y = Y,
-                                      text = 'Earpin', zorder = 3, color = 'red', circle = True)
+        
+        # Make image
+        GUI.Display_Radiography.canvas.axes.imshow(self.LandmarkRG.data, cmap = 'gray', 
+                                                  zorder=1, origin = 'lower')
+        GUI.Display_Radiography.canvas.draw()
+        canvases = [GUI.Display_Radiography.canvas, 
+                    GUI.Display_Isocenter.canvas]
+        
+        # Prepare crosshairs
+        for crosshair in tuple(zip(self.Crosshair_Landmark, canvases)):
+            crosshair[0].setup(crosshair[1], size = 5, x = X ,y = Y,
+                                             text = 'Earpin', zorder = 3, 
+                                             color = 'red', circle = False)
             
         # If landmark and isocenter are provided, calculate spatial shift in RG image
         if Checklist.IsoCenter and Checklist.LandmarkRG:
@@ -289,27 +310,48 @@ class Radiography(object):
             #try to calculate the net distance
             self.CalcDist()
             
-    def return_isocenter(self, x, y):
+    def return_isocenter(self, LynxObj, x, y):
         """Function to be invoked from child window that passes IsoCenter 
         coordinates to main window"""
+        
+        self.IsoCenterImg = LynxObj
 
         GUI.SpotTxt_x.setText('{:.3f}'.format(x))
         GUI.SpotTxt_y.setText('{:.3f}'.format(y))
         GUI.SpotTxt_x.setStyleSheet("color: #b1b1b1;")
         GUI.SpotTxt_y.setStyleSheet("color: #b1b1b1;")
         
-            #Set checklist entry for IsoCenter True and try calculation
-        Checklist.IsoCenter = True
-        GUI.Button_LoadRadiography.setEnabled(True)
-        self.Crosshair_IsoCenter.setup( GUI.Display_Radiography.canvas, size = 5, 
-                                       x = x , y = y, text = 'IsoCenter')
-        
+        #Set checklist entry for IsoCenter True and try calculation
+        Checklist.IsoCenter = True        
         if Checklist.ready():
-            self.CalcDist()
-            
-         
-         
+            self.CalcDist() 
         
+        # Display isocenter image, filename and enable crosshair on this image
+        GUI.Display_Isocenter.canvas.axes.imshow(self.IsoCenterImg.data, cmap = 'gray', 
+                                                  zorder=1, origin = 'lower')
+        GUI.Display_Isocenter.canvas.draw()
+        GUI.Text_RG_Filename_IsoCenter.setText(self.IsoCenterImg.filename)
+        
+        canvases = [GUI.Display_Radiography.canvas, 
+                    GUI.Display_Isocenter.canvas]
+        
+        # Prepare crosshairs
+        for crosshair in tuple(zip(self.Crosshair_IsoCenter, canvases)):
+            crosshair[0].setup(crosshair[1], size = 5, x = x ,y = y,
+                                             text = 'IsoCenter', zorder = 3, 
+                                             color = 'blue', circle = True)
+        # self.Crosshair_IsoCenter.setup(GUI.Display_Isocenter.canvas, 
+        #                                size = 5, x = x , y = y, text = 'IsoCenter')
+        # self.Crosshair_Landmark.setup( , size = 5, x = x ,y = y,
+        #                               text = 'Earpin', zorder = 3, color = 'red', circle = True)
+            
+    def toggleLM(self):
+        for crosshair in self.Crosshair_Landmark:
+            crosshair.toggle()
+            
+    def toggleIso(self):
+        for crosshair in self.Crosshair_IsoCenter:
+            crosshair.toggle()
 
                 
 class Signals(QObject):

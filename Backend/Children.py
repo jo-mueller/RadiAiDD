@@ -21,6 +21,7 @@ except:
 
 
 import matplotlib.patches as patches
+from matplotlib import backend_tools
 import numpy as np
 import traceback, os, ntpath, logging
 import scipy.ndimage.filters as filters
@@ -59,17 +60,16 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         
         self.parent = parent
         self.canvas = self.Display_IsoCenter.canvas
+        self.toolbar = self.canvas.toolbar
         
         #Connect buttons
         self.Button_LoadSpot.clicked.connect(self.load)    
-        self.Button_GetField.clicked.connect(self.get_edges)
         self.Button_detectIsoCenter.clicked.connect(self.define_ROI)
-        self.Button_SetIsoCenter.clicked.connect(self.LockIsoCenter)
-        self.Button_SetFieldLimits.clicked.connect(self.LockField)        
+        self.Button_SetIsoCenter.clicked.connect(self.LockIsoCenter)     
         self.Button_Done.clicked.connect(self.Done)
         
         # Flags and Containers
-        self.Spot = Lynx()        
+        self.Image = Lynx()        
         self.press = None
         self.rects = []
         self.target_markers = []
@@ -90,56 +90,27 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         self.Text_Filename.setText(filename)
         
         # Load Radiography and display
-        self.Spot.load(fname)
-        self.canvas.axes.imshow(self.Spot.data, cmap = 'gray', 
+        self.Image.load(fname)
+        self.canvas.axes.imshow(self.Image.data, cmap = 'gray', 
                                 zorder=1, origin = 'lower')
         self.canvas.draw()
         
         logging.info('{:s} imported as Isocenter Radiography'.format(filename))
         
-        self.x_Left.setText(None)
-        self.x_Right.setText(None)
-        self.y_bottom.setText(None)
-        self.y_top.setText(None)
-        
         self.IsoCenter_flag = False
-        self.FieldSize_flag = False
         
-    def get_edges(self):
-        "Calculates Field edges from loaded scatter image"
-        if self.Spot.data is None:
-            self.Text_Filename.setText('No Data available!')
-            return 0
-        
-        self.x_field, self.y_field = self.Spot.autodetectRectField(threshold = 0.8)
-        self.Spot.crop(self.x_field, self.y_field)
-        self.xmax = np.shape(self.Spot.data)[0]
-        self.ymax = np.shape(self.Spot.data)[1]
 
-        # Display field edges and middle
-        self.x_Left.setText(str(self.x_field[0]))
-        self.x_Right.setText(str(self.x_field[1]))
-        
-        self.y_bottom.setText(str(self.y_field[0]))
-        self.y_top.setText(str(self.y_field[1]))
-        
-        self.canvas.axes.clear()
-        self.canvas.axes.imshow(self.Spot.data, cmap = 'gray', 
-                                zorder=0, origin = 'lower')
-        self.canvas.draw()
-        
-        #Set maximal values for slider and spinbox
-        self.SpotTxt_x.setMaximum(self.xmax)
-        self.SpotTxt_y.setMaximum(self.ymax)
-        
-        logging.info('Radiography field size set to x = [{:.0f},{:.0f}], y = [{:.0f}, {:.0f}]'.format(
-                self.x_field[0], self.x_field[1], self.y_field[0], self.y_field[1]))
-        
-        
-        
         
     def define_ROI(self):
         "Specify a ROI within which the bed contours can be found"
+
+        print(self.Button_detectIsoCenter.isChecked())
+
+        # If button is pressed and user wants to un-press it:
+        if self.Button_detectIsoCenter.isChecked():
+            self.Button_detectIsoCenter.setChecked(False)
+            self.Button_detectIsoCenter.setStyleSheet('border: 2px solid #343434;')
+            return 0
         
         self.Button_detectIsoCenter.setChecked(True)
         self.Button_detectIsoCenter.setStyleSheet('border: 2px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);')
@@ -225,32 +196,9 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         self.IsoCenter_flag = True
         
         # Function to pass IsoCenter values to parent window
-        self.Owner.return_isocenter( self.SpotTxt_x.value(), self.SpotTxt_y.value())
+        self.Owner.return_isocenter(self.Image, self.SpotTxt_x.value(), self.SpotTxt_y.value())
         
         logging.info('Isocenter coordinates confirmed')
-            
-    def LockField(self):
-        "Read current values for field limits to be used for later images"
-        x_left  = float(self.x_Left.text())
-        x_right = float(self.x_Right.text())
-        y_bottom= float(self.y_bottom.text())
-        y_top   = float(self.y_top.text())
-        
-        self.x_Left.setStyleSheet("color: rgb(255, 0, 0);")
-        self.x_Right.setStyleSheet("color: rgb(255, 0, 0);")
-        self.y_bottom.setStyleSheet("color: rgb(255, 0, 0);")
-        self.y_top.setStyleSheet("color: rgb(255, 0, 0);")
-        
-        x = [x_left, x_right]
-        y = [y_bottom, y_top]
-        
-        # Function from parent to receive field limits
-        self.Owner.return_field(x,y)
-        
-        #Raise flag
-        self.FieldSize_flag = True
-        
-        logging.info('Field size confirmed')
 
         
     def update_crosshair(self):
@@ -278,7 +226,7 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         #get data selection from inside the rectangle
         width  = int(np.floor(self.rect.get_width()))
         height = int(np.floor(self.rect.get_height()))        
-        subset = self.Spot.data[y: y + height, x: x + width]
+        subset = self.Image.data[y: y + height, x: x + width]
         
         # Calculate fit function values
         try:
@@ -290,7 +238,7 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
             self.TxtEarpinY.setValue(0)
             return 0
         
-        xx, yy, xrange, yrange = array2mesh(self.Spot.data)
+        xx, yy, xrange, yrange = array2mesh(self.Image.data)
         data_fitted = twoD_Gaussian((xx, yy), *popt)
     
         # Print markers into image
@@ -307,7 +255,7 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
     def Done(self):
         "Ends IsoCenter Definition and closes Child"
         # Also check whether all values were locked to main window
-        if False in [self.FieldSize_flag, self.IsoCenter_flag]:
+        if not self.IsoCenter_flag:
             Hint = QMessage()
             Hint.setStandardButtons( QMessage.No | QMessage.Yes)
             Hint.setIcon(QMessage.Information)
@@ -317,19 +265,9 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         else:
             self.close()
             
-                
-            
-                    
-        
-        
 
 
 
-
-
-
-        
-        
 ''''''''''''''''''''''''
 """Landmark -Dialogue"""
 ''''''''''''''''''''''''
@@ -341,11 +279,13 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         self.setupUi(self)
         self.parent = parent # GUI instance
         self.Owner = Owner
-        self.image_data = Owner.Radiography_scatter
+        # self.image_data = Owner.Radiography_scatter
+        
+        # Data container
+        self.Image = Lynx()
         
         # Set up plots
         self.canvas = self.Display_Landmarks.canvas
-        self.setplot()
         
         # Connect Buttons and fields
         self.d_SourceDetector.valueChanged.connect(self.calcspacing)
@@ -359,6 +299,7 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         self.Button_defineROI.clicked.connect(self.define_ROI) # define ROI for earpin autodetection
         
         #Buttons about earpin definition
+        self.Button_LoadLandmark.clicked.connect(self.load) # Load Radiography image
         self.Button_accptPxSpace.clicked.connect(self.accept_spacing) # set bed values and disconnect all sliders and pass values relevant for spacing to parent
         self.Button_lockEarpin.clicked.connect(self.Lock_Landmarks) # pass values about landmarks to parent
         
@@ -372,6 +313,27 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         
         self.Landmark_flag = False
         self.Spacing_flag  = False
+        
+    def load(self):
+        "load radiography image of Bedding landmark"
+        if pyqt_version == 5:
+            fname = Qfile.getOpenFileName(self, 'Open file', folder,"Dicom files (*.dcm)")[0]
+        else:
+            fname = str(Qfile.getOpenFileName(self, 'Open file', folder,"Dicom files (*.dcm)"))
+        
+        # get filename from full path and display     
+        _, filename = ntpath.split(fname)
+        self.Text_Filename.setText(filename)
+        
+        # Load Radiography and display
+        self.Image.load(fname)
+        self.canvas.axes.imshow(self.Image.data, cmap = 'gray', 
+                                zorder=1, origin = 'lower')
+        self.canvas.draw()
+        
+        logging.info('{:s} imported as Isocenter Radiography'.format(filename))
+        
+        self.IsoCenter_flag = False
                     
         
     def calcspacing(self):
@@ -384,16 +346,7 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         if d_OD !=0 and d_SD != 0:
             self.Spacing = dd*(1.0 - d_OD/d_SD)
             self.LabelPixSpace.setText('Pixel Spacing: ' + '{:4.2f}'.format(self.Spacing) + ' mm')
-        
-    def setplot(self):
-        
-        self.xmax = np.size(self.image_data.data,1)
-        self.ymax = np.size(self.image_data.data,0)
-        
-        # Take and display image data from parent
-        self.canvas.axes.imshow(self.image_data.data, cmap = 'gray', 
-                                zorder = 0, origin = 'lower')
-        self.canvas.draw()        
+              
         
     def define_ROI(self):
         "Specify a ROI within which the bed contours can be found"
@@ -483,7 +436,7 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         height = int(np.floor(self.rect.get_height()))
         
         #get data selection from inside the rectangle and invert
-        subset = self.image_data.data[y: y + height, x: x + width]
+        subset = self.Image.data[y: y + height, x: x + width]
         subset = np.max(subset) - subset
         
         # Calculate fit function values
@@ -496,7 +449,7 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
             self.TxtEarpinY.setValue(0)
             return 0
         
-        xx, yy, xrange, yrange = array2mesh(self.image_data.data)
+        xx, yy, xrange, yrange = array2mesh(self.Image.data)
         data_fitted = twoD_Gaussian((xx, yy), *popt)
     
         # Print markers into image
@@ -541,7 +494,7 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         self.TxtEarpinY.setStyleSheet("color: rgb(255, 0, 0);")
         
         # Check and pass
-        self.Owner.return_landmarks(self.TxtEarpinX.value(), self.TxtEarpinY.value())
+        self.Owner.return_landmarks(self.Image, self.TxtEarpinX.value(), self.TxtEarpinY.value())
         
         # Raise Flag
         self.Landmark_flag = True

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'F:\Dokumente\Promotion\Projects\Protonenexperimente\Scripts\Positioning_GUI\V2.5.7\Backend\Landmark.ui'
+# Form implementation generated from reading ui file 'Landmark.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,11 +11,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Landmark(object):
     def setupUi(self, Landmark):
         Landmark.setObjectName("Landmark")
-        Landmark.resize(634, 475)
+        Landmark.resize(787, 539)
         self.centralwidget = QtWidgets.QWidget(Landmark)
         self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout.setObjectName("gridLayout")
+        self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout_2.setObjectName("gridLayout_2")
         self.Display_Landmarks = matplotlibWidget(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -23,7 +23,23 @@ class Ui_Landmark(object):
         sizePolicy.setHeightForWidth(self.Display_Landmarks.sizePolicy().hasHeightForWidth())
         self.Display_Landmarks.setSizePolicy(sizePolicy)
         self.Display_Landmarks.setObjectName("Display_Landmarks")
-        self.gridLayout.addWidget(self.Display_Landmarks, 0, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.Display_Landmarks, 0, 0, 2, 1)
+        self.groupBox_2 = QtWidgets.QGroupBox(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.groupBox_2.sizePolicy().hasHeightForWidth())
+        self.groupBox_2.setSizePolicy(sizePolicy)
+        self.groupBox_2.setObjectName("groupBox_2")
+        self.gridLayout = QtWidgets.QGridLayout(self.groupBox_2)
+        self.gridLayout.setObjectName("gridLayout")
+        self.Button_LoadLandmark = QtWidgets.QPushButton(self.groupBox_2)
+        self.Button_LoadLandmark.setObjectName("Button_LoadLandmark")
+        self.gridLayout.addWidget(self.Button_LoadLandmark, 0, 0, 1, 1)
+        self.Text_Filename = QtWidgets.QTextBrowser(self.groupBox_2)
+        self.Text_Filename.setObjectName("Text_Filename")
+        self.gridLayout.addWidget(self.Text_Filename, 1, 0, 1, 1)
+        self.gridLayout_2.addWidget(self.groupBox_2, 0, 1, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox_autodetect = QtWidgets.QGroupBox(self.centralwidget)
@@ -99,10 +115,10 @@ class Ui_Landmark(object):
         self.verticalLayout.addWidget(self.Button_Done)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem)
-        self.gridLayout.addLayout(self.verticalLayout, 0, 1, 1, 1)
+        self.gridLayout_2.addLayout(self.verticalLayout, 1, 1, 1, 1)
         Landmark.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(Landmark)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 634, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 787, 26))
         self.menubar.setObjectName("menubar")
         Landmark.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(Landmark)
@@ -115,6 +131,8 @@ class Ui_Landmark(object):
     def retranslateUi(self, Landmark):
         _translate = QtCore.QCoreApplication.translate
         Landmark.setWindowTitle(_translate("Landmark", "Landmark Definition"))
+        self.groupBox_2.setTitle(_translate("Landmark", "GroupBox"))
+        self.Button_LoadLandmark.setText(_translate("Landmark", "Load Landmark Image"))
         self.groupBox_autodetect.setTitle(_translate("Landmark", "Pixel Spacing"))
         self.label_4.setText(_translate("Landmark", "<html><head/><body><p>Source-Detector: d<span style=\" vertical-align:sub;\">SD </span>=</p></body></html>"))
         self.label_6.setText(_translate("Landmark", "cm"))

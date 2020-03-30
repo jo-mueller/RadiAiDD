@@ -282,7 +282,7 @@
             </widget>
            </item>
            <item row="1" column="0" colspan="4">
-            <widget class="QTextEdit" name="Text_RG_Filename_Landmark">
+            <widget class="QTextEdit" name="Text_RG_Filename">
              <property name="maximumSize">
               <size>
                <width>16777215</width>
@@ -3093,7 +3093,7 @@
      <widget class="QGroupBox" name="groupBox">
       <property name="minimumSize">
        <size>
-        <width>200</width>
+        <width>150</width>
         <height>0</height>
        </size>
       </property>
