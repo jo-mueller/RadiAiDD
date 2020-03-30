@@ -1,0 +1,5 @@
+# ignore python byte code files
+*.pyc
+
+# ingore test data
+Img_Data
