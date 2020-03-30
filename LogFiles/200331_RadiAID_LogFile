@@ -196,3 +196,198 @@
 00:53:29,851 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
 00:53:30,871 root INFO Coordinates of Radiography landmarks confirmed
 00:56:47,35 root INFO ++++++++ GUI closed ++++++++++++
+01:01:48,322 root INFO ========== GUI STARTED ==============
+01:01:48,323 root INFO Propper Logger installed.
+01:01:48,324 root INFO Radiography class successfully initialized
+01:01:48,330 root DEBUG Table Status WatchDog initialized
+01:01:48,331 root DEBUG Motor functionality set up successfully
+01:01:48,331 root INFO Table Status WatchDog awake
+01:10:27,258 root INFO ++++++++ GUI closed ++++++++++++
+01:16:59,309 root INFO ========== GUI STARTED ==============
+01:17:04,417 root INFO ========== GUI STARTED ==============
+01:17:04,417 root INFO Propper Logger installed.
+01:17:04,417 root INFO Radiography class successfully initialized
+01:17:04,423 root DEBUG Table Status WatchDog initialized
+01:17:04,424 root DEBUG Motor functionality set up successfully
+01:17:04,424 root INFO Table Status WatchDog awake
+01:18:13,204 root INFO ========== GUI STARTED ==============
+01:18:13,204 root INFO Propper Logger installed.
+01:18:13,204 root INFO Radiography class successfully initialized
+01:18:13,210 root DEBUG Table Status WatchDog initialized
+01:18:13,210 root DEBUG Motor functionality set up successfully
+01:18:13,210 root INFO Table Status WatchDog awake
+01:22:45,268 root INFO ========== GUI STARTED ==============
+01:22:45,268 root INFO Propper Logger installed.
+01:22:45,268 root INFO Radiography class successfully initialized
+01:22:45,275 root DEBUG Table Status WatchDog initialized
+01:22:45,275 root DEBUG Motor functionality set up successfully
+01:22:45,275 root INFO Table Status WatchDog awake
+01:23:01,698 root INFO ========== GUI STARTED ==============
+01:23:01,698 root INFO Propper Logger installed.
+01:23:01,698 root INFO Radiography class successfully initialized
+01:23:01,704 root DEBUG Table Status WatchDog initialized
+01:23:01,704 root DEBUG Motor functionality set up successfully
+01:23:01,704 root INFO Table Status WatchDog awake
+01:24:09,341 root INFO ========== GUI STARTED ==============
+01:24:09,341 root INFO Propper Logger installed.
+01:24:09,341 root INFO Radiography class successfully initialized
+01:24:09,347 root DEBUG Table Status WatchDog initialized
+01:24:09,347 root DEBUG Motor functionality set up successfully
+01:24:09,348 root INFO Table Status WatchDog awake
+01:24:43,245 root INFO ========== GUI STARTED ==============
+01:24:43,246 root INFO Propper Logger installed.
+01:24:43,246 root INFO Radiography class successfully initialized
+01:24:43,252 root DEBUG Table Status WatchDog initialized
+01:24:43,252 root DEBUG Motor functionality set up successfully
+01:24:43,252 root INFO Table Status WatchDog awake
+01:25:10,259 root INFO ========== GUI STARTED ==============
+01:25:10,260 root INFO Propper Logger installed.
+01:25:10,260 root INFO Radiography class successfully initialized
+01:25:10,280 root DEBUG Table Status WatchDog initialized
+01:25:10,280 root DEBUG Motor functionality set up successfully
+01:25:10,281 root INFO Table Status WatchDog awake
+01:26:00,661 root INFO ========== GUI STARTED ==============
+01:26:00,661 root INFO Propper Logger installed.
+01:26:01,220 root INFO Radiography class successfully initialized
+01:26:03,740 root DEBUG Table Status WatchDog initialized
+01:26:03,740 root DEBUG Motor functionality set up successfully
+01:26:03,740 root INFO Table Status WatchDog awake
+01:29:41,172 root INFO ========== GUI STARTED ==============
+01:29:41,172 root INFO Propper Logger installed.
+01:29:41,172 root INFO Radiography class successfully initialized
+01:29:41,178 root DEBUG Table Status WatchDog initialized
+01:29:41,179 root DEBUG Motor functionality set up successfully
+01:29:41,179 root INFO Table Status WatchDog awake
+01:29:58,684 root INFO ========== GUI STARTED ==============
+01:29:58,684 root INFO Propper Logger installed.
+01:29:58,684 root INFO Radiography class successfully initialized
+01:29:58,690 root DEBUG Table Status WatchDog initialized
+01:29:58,690 root DEBUG Motor functionality set up successfully
+01:29:58,691 root INFO Table Status WatchDog awake
+01:30:55,948 root INFO ========== GUI STARTED ==============
+01:30:55,949 root INFO Propper Logger installed.
+01:30:55,949 root INFO Radiography class successfully initialized
+01:30:55,955 root DEBUG Table Status WatchDog initialized
+01:30:55,955 root DEBUG Motor functionality set up successfully
+01:30:55,955 root INFO Table Status WatchDog awake
+01:31:30,888 root INFO ========== GUI STARTED ==============
+01:31:30,888 root INFO Propper Logger installed.
+01:31:30,888 root INFO Radiography class successfully initialized
+01:31:30,894 root DEBUG Table Status WatchDog initialized
+01:31:30,894 root DEBUG Motor functionality set up successfully
+01:31:30,895 root INFO Table Status WatchDog awake
+01:34:27,568 root INFO ========== GUI STARTED ==============
+01:34:27,569 root INFO Propper Logger installed.
+01:34:27,569 root INFO Radiography class successfully initialized
+01:34:27,575 root DEBUG Table Status WatchDog initialized
+01:34:27,575 root DEBUG Motor functionality set up successfully
+01:34:27,576 root INFO Table Status WatchDog awake
+01:35:09,656 root INFO ========== GUI STARTED ==============
+01:35:09,656 root INFO Propper Logger installed.
+01:35:09,656 root INFO Radiography class successfully initialized
+01:35:09,662 root DEBUG Table Status WatchDog initialized
+01:35:09,662 root DEBUG Motor functionality set up successfully
+01:35:09,663 root INFO Table Status WatchDog awake
+01:36:01,931 root INFO ========== GUI STARTED ==============
+01:36:01,931 root INFO Propper Logger installed.
+01:36:01,931 root INFO Radiography class successfully initialized
+01:36:01,937 root DEBUG Table Status WatchDog initialized
+01:36:01,937 root DEBUG Motor functionality set up successfully
+01:36:01,937 root INFO Table Status WatchDog awake
+01:37:55,272 root INFO ========== GUI STARTED ==============
+01:37:55,272 root INFO Propper Logger installed.
+01:37:55,272 root INFO Radiography class successfully initialized
+01:37:55,280 root DEBUG Table Status WatchDog initialized
+01:37:55,280 root DEBUG Motor functionality set up successfully
+01:37:55,280 root INFO Table Status WatchDog awake
+01:37:58,315 root INFO ++++++++ GUI closed ++++++++++++
+01:40:42,642 root INFO ========== GUI STARTED ==============
+01:40:42,643 root INFO Propper Logger installed.
+01:40:42,643 root INFO Radiography class successfully initialized
+01:40:42,651 root DEBUG Table Status WatchDog initialized
+01:40:42,652 root DEBUG Motor functionality set up successfully
+01:40:42,652 root INFO Table Status WatchDog awake
+01:40:48,143 root INFO ++++++++ GUI closed ++++++++++++
+01:43:01,673 root INFO ========== GUI STARTED ==============
+01:43:10,247 root INFO ========== GUI STARTED ==============
+01:43:10,247 root INFO Propper Logger installed.
+01:43:10,247 root INFO Radiography class successfully initialized
+01:43:10,255 root DEBUG Table Status WatchDog initialized
+01:43:10,255 root DEBUG Motor functionality set up successfully
+01:43:10,255 root INFO Table Status WatchDog awake
+01:45:47,142 root INFO ++++++++ GUI closed ++++++++++++
+01:45:49,129 root INFO ========== GUI STARTED ==============
+01:45:49,130 root INFO Propper Logger installed.
+01:45:49,131 root INFO Radiography class successfully initialized
+01:45:49,138 root DEBUG Table Status WatchDog initialized
+01:45:49,138 root DEBUG Motor functionality set up successfully
+01:45:49,139 root INFO Table Status WatchDog awake
+01:45:58,544 root INFO ++++++++ GUI closed ++++++++++++
+01:48:08,764 root INFO ========== GUI STARTED ==============
+01:48:44,953 root INFO ========== GUI STARTED ==============
+01:48:44,954 root INFO Propper Logger installed.
+01:48:44,954 root INFO Radiography class successfully initialized
+01:48:44,960 root DEBUG Table Status WatchDog initialized
+01:48:44,961 root DEBUG Motor functionality set up successfully
+01:48:44,961 root INFO Table Status WatchDog awake
+01:48:51,4 root INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+01:48:54,332 root INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+01:48:54,420 root INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+01:48:55,404 root INFO Isocenter coordinates confirmed
+01:49:02,596 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+01:49:08,95 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+01:49:09,876 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+01:49:09,962 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+01:49:10,986 root INFO Coordinates of Radiography landmarks confirmed
+01:51:49,846 root INFO ++++++++ GUI closed ++++++++++++
+01:51:52,201 root INFO ========== GUI STARTED ==============
+01:51:52,201 root INFO Propper Logger installed.
+01:51:52,202 root INFO Radiography class successfully initialized
+01:51:52,210 root DEBUG Table Status WatchDog initialized
+01:51:52,210 root DEBUG Motor functionality set up successfully
+01:51:52,211 root INFO Table Status WatchDog awake
+01:51:57,542 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+01:51:58,828 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+01:52:00,808 root INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+01:52:00,900 root INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+01:52:01,792 root INFO Coordinates of Radiography landmarks confirmed
+01:52:09,635 root INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+01:52:10,940 root INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+01:52:13,63 root INFO Detected coordinates for earpin: x = 371.0, y = 376.4
+01:52:13,146 root INFO Coordinates of Radiography landmarks: x = 371.0, y = 376.4
+01:52:14,705 root INFO Coordinates of Radiography landmarks confirmed
+01:54:00,699 root INFO ++++++++ GUI closed ++++++++++++
+01:54:02,811 root INFO ========== GUI STARTED ==============
+01:54:02,811 root INFO Propper Logger installed.
+01:54:02,812 root INFO Radiography class successfully initialized
+01:54:02,819 root DEBUG Table Status WatchDog initialized
+01:54:02,820 root DEBUG Motor functionality set up successfully
+01:54:02,820 root INFO Table Status WatchDog awake
+01:54:09,964 root INFO ++++++++ GUI closed ++++++++++++
+01:55:08,813 root INFO ========== GUI STARTED ==============
+01:55:08,814 root INFO Propper Logger installed.
+01:55:08,815 root INFO Radiography class successfully initialized
+01:55:08,824 root DEBUG Table Status WatchDog initialized
+01:55:08,825 root DEBUG Motor functionality set up successfully
+01:55:08,826 root INFO Table Status WatchDog awake
+01:55:45,13 root INFO ++++++++ GUI closed ++++++++++++
+01:55:46,752 root INFO ========== GUI STARTED ==============
+01:55:51, INFO ========== GUI STARTED ==============
+01:55:51, INFO Propper Logger installed.
+01:55:51, INFO Radiography class successfully initialized
+01:55:51, DEBUG Table Status WatchDog initialized
+01:55:51, DEBUG Motor functionality set up successfully
+01:55:51, INFO Table Status WatchDog awake
+01:56:01, INFO Log Level: Info
+01:56:14, INFO Changed directory for logfile to: F:\Documents\Promotion\Projects\RadiAID\LogFiles\200331_RadiAID_LogFile
+01:56:14, INFO Log Level: Debug
+01:56:32, INFO ExponatO_Lynx_7nA0_colli_6_i.dcm imported as Isocenter Radiography
+01:56:34, INFO Detected coordinates for earpin: x = 291.1, y = 278.1
+01:56:34, INFO Coordinates of IsoCenter set to x = 291.1, y = 278.1
+01:56:35, INFO Isocenter coordinates confirmed
+01:57:12, INFO ExponatO_Lynx_7nA0_bed_corrpos_7_i.dcm imported as Isocenter Radiography
+01:57:14, INFO Pixel spacing k = 0.48 mm/px of landmark radiography confirmed
+01:57:16, INFO Detected coordinates for earpin: x = 290.6, y = 290.6
+01:57:17, INFO Coordinates of Radiography landmarks: x = 290.6, y = 290.6
+01:57:18, INFO Coordinates of Radiography landmarks confirmed
+01:57:38, INFO ++++++++ GUI closed ++++++++++++

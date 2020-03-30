@@ -54,7 +54,7 @@ from datetime import datetime
 
 class Radiography(object):
     def __init__(self):
-
+        
         try:
             # Patient Positioning holds information about positioning of patient in CT
             self.PatientPosition = []
@@ -173,9 +173,11 @@ class Radiography(object):
             proceed = Hint.exec_()
             if proceed == QMessage.Ok:
                 #Remove all Landmark-related values/flags
-                if self.Crosshair_IsoCenter.visible: self.Crosshair_IsoCenter.toggle()
-                if self.Crosshair_Target.visible: self.Crosshair_Target.toggle()
-                self.Crosshair_Landmark.wipe()                    
+                # [crosshair.toggle() for crosshair in self.Crosshair_IsoCenter if self.Crosshair_Iso
+                # if self.Crosshair_IsoCenter.visible: self.Crosshair_IsoCenter.toggle()
+                # if self.Crosshair_Target.visible: self.Crosshair_Target.toggle()
+                [crosshair.wipe for crosshair in self.Crosshair_Landmark]
+                # self.Crosshair_Landmark.wipe()                    
                 GUI.TxtRGPinX.setText('')
                 GUI.TxtRGPinY.setText('')
                 GUI.TxtRGShiftX.setText('')
@@ -1657,7 +1659,7 @@ class Log(object):
         
         logging.basicConfig(filename=self.fname,
                             filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            format='%(asctime)s, %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
                             level=logging.DEBUG)
         
@@ -1721,7 +1723,7 @@ class Log(object):
         # set new logfile config
         logging.basicConfig(filename=self.fname,
                             filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            format='%(asctime)s, %(levelname)s %(message)s',
                             datefmt='%H:%M:%S')
         logging.info('Changed directory for logfile to: {:s}'.format(self.fname))
         self.LogLevelDebug()
@@ -1758,7 +1760,7 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
         super().__init__(parent)
 
         #Initialize GUI and load stylesheet
-        self.setupUi(self)      
+        self.setupUi(self)
         
     
     def closeEvent(self, event):
@@ -1772,6 +1774,8 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
         app.quit()
 
 if __name__=="__main__":  
+    
+    root = os.getcwd()
     
     #Assign Checklist
     Checklist = Check()
@@ -1788,10 +1792,15 @@ if __name__=="__main__":
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
     app.setWindowIcon(QtGui.QIcon('Backend/Icons/icon2.png'))
 
-    # Create GUI
+    # Create GUI + Logo and Style
     GUI = MainWindow()
-    GUI.setStyleSheet(open(os.path.join(os.getcwd() +'\\Backend\\Style\\stylefile.qss'), "r").read())
+    GUI.setStyleSheet(open(os.path.join(root, 'Backend','Style', 'stylefile.qss'), "r").read())
     GUI.show()
+    
+    # Make Logo
+    image = QtGui.QImage(os.path.join(root, "Backend", "Icons", "Pic.jpg"))
+    GUI.Logo.setPixmap(QtGui.QPixmap.fromImage(image))
+
     
     #initialize Radiography- and XRay-related functions
     Logger      = Log()

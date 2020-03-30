@@ -3089,6 +3089,29 @@
       </widget>
      </widget>
     </item>
+    <item row="0" column="1" rowspan="2">
+     <widget class="QSplitter" name="splitter_4">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Log</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="LogBox"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
     <item row="1" column="0">
      <widget class="QGroupBox" name="GroupCoordinates">
       <property name="sizePolicy">
@@ -3644,34 +3667,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item row="0" column="1" rowspan="2">
-     <widget class="QSplitter" name="splitter_4">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="QLabel" name="Logo">
-       <property name="text">
-        <string>TextLabel</string>
-       </property>
-      </widget>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Log</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_14">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="LogBox"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
