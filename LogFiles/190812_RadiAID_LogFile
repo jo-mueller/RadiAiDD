@@ -1,0 +1,69 @@
+08:28:46,217 root INFO ========== GUI STARTED ==============
+08:28:46,217 root INFO Propper Logger installed.
+08:28:46,218 root INFO Radiography class successfully initialized
+08:28:46,472 root DEBUG Table Status WatchDog initialized
+08:28:46,473 root DEBUG Motor functionality set up successfully
+08:28:46,474 root INFO Table Status WatchDog awake
+08:29:21,222 root DEBUG Trying to open serial connection.
+08:29:21,257 root INFO Port COM3 ready for serial communication.
+08:29:21,258 root DEBUG Scanning Master/Slave structure...
+08:29:24,402 root DEBUG Found Slave at ID=3
+08:30:12,992 root INFO ++++++++ GUI closed ++++++++++++
+08:32:04,25 root INFO ========== GUI STARTED ==============
+08:32:34,654 root INFO ========== GUI STARTED ==============
+08:32:34,656 root INFO Propper Logger installed.
+08:32:34,657 root INFO Radiography class successfully initialized
+08:32:34,727 root DEBUG Table Status WatchDog initialized
+08:32:34,728 root DEBUG Motor functionality set up successfully
+08:32:34,728 root INFO Table Status WatchDog awake
+08:32:40,140 root DEBUG Trying to open serial connection.
+08:32:40,176 root INFO Port COM3 ready for serial communication.
+08:32:40,177 root DEBUG Scanning Master/Slave structure...
+08:32:43,328 root DEBUG Found Slave at ID=3
+08:33:17,536 root INFO ++++++++ GUI closed ++++++++++++
+08:35:09,693 root INFO ========== GUI STARTED ==============
+08:35:28,216 root INFO ========== GUI STARTED ==============
+08:35:28,216 root INFO Propper Logger installed.
+08:35:28,217 root INFO Radiography class successfully initialized
+08:35:28,288 root DEBUG Table Status WatchDog initialized
+08:35:28,289 root DEBUG Motor functionality set up successfully
+08:35:28,290 root INFO Table Status WatchDog awake
+08:35:32,804 root DEBUG Trying to open serial connection.
+08:35:32,839 root INFO Port COM3 ready for serial communication.
+08:35:32,840 root DEBUG Scanning Master/Slave structure...
+08:35:35,993 root DEBUG Found Slave at ID=3
+08:35:43,337 root INFO ++++++++ GUI closed ++++++++++++
+08:36:14,21 root INFO ========== GUI STARTED ==============
+08:36:14,21 root INFO Propper Logger installed.
+08:36:14,22 root INFO Radiography class successfully initialized
+08:36:14,93 root DEBUG Table Status WatchDog initialized
+08:36:14,94 root DEBUG Motor functionality set up successfully
+08:36:14,95 root INFO Table Status WatchDog awake
+08:36:18,39 root DEBUG Trying to open serial connection.
+08:36:18,74 root INFO Port COM3 ready for serial communication.
+08:36:18,76 root DEBUG Scanning Master/Slave structure...
+08:36:21,226 root DEBUG Found Slave at ID=3
+08:36:32,280 root INFO ++++++++ GUI closed ++++++++++++
+08:40:05,676 root INFO ========== GUI STARTED ==============
+08:40:05,677 root INFO Propper Logger installed.
+08:40:05,677 root INFO Radiography class successfully initialized
+08:40:05,748 root DEBUG Table Status WatchDog initialized
+08:40:05,749 root DEBUG Motor functionality set up successfully
+08:40:05,750 root INFO Table Status WatchDog awake
+08:40:09,870 root DEBUG Trying to open serial connection.
+08:40:09,907 root INFO Port COM3 ready for serial communication.
+08:40:09,908 root DEBUG Scanning Master/Slave structure...
+08:40:13,59 root DEBUG Found Slave at ID=3
+08:40:17,768 root INFO ++++++++ GUI closed ++++++++++++
+08:42:10,564 root INFO ========== GUI STARTED ==============
+08:42:37,889 root INFO ========== GUI STARTED ==============
+08:42:37,889 root INFO Propper Logger installed.
+08:42:37,890 root INFO Radiography class successfully initialized
+08:42:37,962 root DEBUG Table Status WatchDog initialized
+08:42:37,963 root DEBUG Motor functionality set up successfully
+08:42:37,963 root INFO Table Status WatchDog awake
+08:42:41,835 root DEBUG Trying to open serial connection.
+08:42:41,870 root INFO Port COM3 ready for serial communication.
+08:42:41,872 root DEBUG Scanning Master/Slave structure...
+08:42:45,23 root DEBUG Found Slave at ID=3
+08:42:49,460 root INFO ++++++++ GUI closed ++++++++++++
