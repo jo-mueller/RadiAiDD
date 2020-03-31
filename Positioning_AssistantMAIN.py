@@ -1650,7 +1650,7 @@ class Log(object):
         self.LogDir = os.path.join(os.getcwd(), 'LogFiles')
         
         # make default place for logfile
-        self.fname = '{:s}_RadiAID_LogFile'.format(datetime.strftime(datetime.today(), '%y%m%d'))
+        self.fname = '{:s}_RadiAID_LogFile.log'.format(datetime.strftime(datetime.today(), '%y%m%d'))
         self.fname = os.path.join(self.LogDir, self.fname)
         
         GUI.action_LogLevel_Debug.setChecked(True)
