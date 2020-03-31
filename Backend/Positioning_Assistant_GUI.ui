@@ -3653,7 +3653,13 @@
       </property>
       <widget class="QLabel" name="Logo">
        <property name="text">
-        <string>TextLabel</string>
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap>Icons/Pic.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
        </property>
       </widget>
       <widget class="QGroupBox" name="groupBox">
