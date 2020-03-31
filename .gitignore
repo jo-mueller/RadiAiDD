@@ -1,5 +1,6 @@
 # ignore python byte code files
 *.pyc
+*.log
 
 # ingore test data
 Img_Data
