@@ -3,9 +3,6 @@ Latest stable version of Positioning Interface.
 
 ![](./Icons/icon.png)
 
-Date: 20.04.2018
-Author: Johannes Müller
-
 ### 1. How to run:
 
 * Go to folder with Positioning_AssistantMAIN.py (presumably the one you are at right now)
