@@ -33,4 +33,5 @@ The default location for the creation of the logfile is in the directory of the 
 If you use this software, please cite the following publications:
 
 Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
+
 Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205–212 (2020).
