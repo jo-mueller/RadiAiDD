@@ -1,7 +1,8 @@
 # RadiAID
-Latest stable version of Positioning Interface.
 
 ![](./Icons/icon.png)
+
+Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
 
 ### 1. How to run:
 
@@ -27,3 +28,8 @@ Latest stable version of Positioning Interface.
 ### 4. Logfile
 A Logfile can be exported that saves all sorts of stuff. 
 The default location for the creation of the logfile is in the directory of the program itself.
+
+### 5. Citations
+If you use this software, please cite the following publications:
+
+Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
