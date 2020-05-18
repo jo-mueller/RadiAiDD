@@ -4,6 +4,20 @@
 
 Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
 
+### Setup
+You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual).
+
+#### Additional packages:
+RadiAID requires a few python packages that don't come with the anaconda distribution. To download and install new packages, install anaconda and launch the anaconda command line. You can do this in two ways. You can either open the console through the windows start menu 
+![](./imgs/launch_prompt1.png)
+or through the Anaconda interface. For the second option, start anaconda and navigate to the ''Environments'' tab. Click the green triangle next to ''root'' and then click ''open terminal'' 
+![](./imgs/launch_prompt2.png)
+
+Onco you started the anaconda command prompt, you will have to install/update the following packages:
+* PySerial: type the following to install
+        conda install -c anaconda pyserial
+* PyDicom
+
 ### 1. How to run:
 
 * Go to folder with Positioning_AssistantMAIN.py (presumably the one you are at right now)
@@ -32,6 +46,6 @@ The default location for the creation of the logfile is in the directory of the 
 ### 5. Citations
 If you use this software, please cite the following publications:
 
-Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
+MÃ¼ller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399â€“1405 (2017).
 
-Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205–212 (2020).
+Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205â€“212 (2020).
