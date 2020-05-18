@@ -14,9 +14,8 @@ or through the Anaconda interface. For the second option, start anaconda and nav
 ![](./imgs/launch_prompt2.png)
 
 Onco you started the anaconda command prompt, you will have to install/update the following packages:
-* PySerial: type the following to install
-        conda install -c anaconda pyserial
-* PyDicom
+* PySerial: type the following to install: `conda install -c anaconda pyserial`
+* PyDicom: type the following to install: `conda install -c conda-forge pydicom`
 
 ### 1. How to run:
 
