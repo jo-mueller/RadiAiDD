@@ -15,7 +15,6 @@ except:
 
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 import pydicom as dicom
 import scipy.ndimage.filters as filters
 import traceback

@@ -89,16 +89,18 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         _, filename = ntpath.split(fname)
         self.Text_Filename.setText(filename)
         
-        # Load Radiography and display
-        self.Image.load(fname)
-        self.canvas.axes.imshow(self.Image.data, cmap = 'gray', 
-                                zorder=1, origin = 'lower')
-        self.canvas.draw()
-        
-        logging.info('{:s} imported as Isocenter Radiography'.format(filename))
-        
-        self.IsoCenter_flag = False
-        
+        try:
+            # Load Radiography and display
+            self.Image.load(fname)
+            self.canvas.axes.imshow(self.Image.data, cmap = 'gray', 
+                                    zorder=1, origin = 'lower')
+            self.canvas.draw()
+            
+            logging.info('{:s} imported as Isocenter Radiography'.format(filename))
+            
+            self.IsoCenter_flag = False
+        except:
+            pass
 
         
     def define_ROI(self):
