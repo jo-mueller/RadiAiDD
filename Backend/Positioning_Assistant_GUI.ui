@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1727</width>
-    <height>893</height>
+    <width>1527</width>
+    <height>1023</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -39,7 +39,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="TabTop">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TabRadiography">
        <attribute name="title">
@@ -1471,8 +1471,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>970</width>
-                     <height>415</height>
+                     <width>300</width>
+                     <height>231</height>
                     </rect>
                    </property>
                    <attribute name="label">
@@ -1761,8 +1761,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>970</width>
-                     <height>415</height>
+                     <width>403</width>
+                     <height>259</height>
                     </rect>
                    </property>
                    <attribute name="label">
@@ -1898,7 +1898,7 @@
                      <x>0</x>
                      <y>0</y>
                      <width>970</width>
-                     <height>415</height>
+                     <height>545</height>
                     </rect>
                    </property>
                    <attribute name="label">
@@ -2416,7 +2416,7 @@
                        </property>
                        <property name="icon">
                         <iconset>
-                         <normaloff>Icons/move_top.png</normaloff>Icons/move_top.png</iconset>
+                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_top.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_top.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2427,7 +2427,7 @@
                        </property>
                        <property name="icon">
                         <iconset>
-                         <normaloff>Icons/move_left.png</normaloff>Icons/move_left.png</iconset>
+                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_left.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_left.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2452,7 +2452,7 @@
                        </property>
                        <property name="icon">
                         <iconset>
-                         <normaloff>Icons/move_right.png</normaloff>Icons/move_right.png</iconset>
+                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_right.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_right.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2463,7 +2463,7 @@
                        </property>
                        <property name="icon">
                         <iconset>
-                         <normaloff>Icons/move_down.png</normaloff>Icons/move_down.png</iconset>
+                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_down.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_down.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -3658,7 +3658,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap>Icons/Pic.jpg</pixmap>
+        <pixmap>C:/Users/johan/.designer/backup/Icons/Pic.jpg</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -3690,7 +3690,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1727</width>
+     <width>1527</width>
      <height>26</height>
     </rect>
    </property>
@@ -3715,8 +3715,15 @@
     <addaction name="action_Log_Serial_Com"/>
     <addaction name="actionSet_Logfile_Directory"/>
    </widget>
+   <widget class="QMenu" name="menuUtils">
+    <property name="title">
+     <string>Utils</string>
+    </property>
+    <addaction name="action_scan_COM_ports"/>
+   </widget>
    <addaction name="menuActions"/>
    <addaction name="menuOptions"/>
+   <addaction name="menuUtils"/>
   </widget>
   <action name="actionLoad_Radiography_scatter">
    <property name="text">
@@ -3765,6 +3772,11 @@
   <action name="actionSet_Logfile_Directory">
    <property name="text">
     <string>Set Logfile Directory</string>
+   </property>
+  </action>
+  <action name="action_scan_COM_ports">
+   <property name="text">
+    <string>Rescan COM ports</string>
    </property>
   </action>
  </widget>
