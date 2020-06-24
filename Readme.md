@@ -1,14 +1,12 @@
-# RadiAID
-
-![](./Icons/icon.png)
+# RadiAide
 
 Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
 
 ### Setup
-You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual).
+You'll need a bit of stuff to set up RadiAide and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual).
 
 #### Additional packages:
-RadiAID requires a few python packages that don't come with the anaconda distribution. To download and install new packages, install anaconda and launch the anaconda command line. You can do this in two ways. You can either open the console through the windows start menu 
+RadiAide requires a few python packages that don't come with the anaconda distribution. To download and install new packages, install anaconda and launch the anaconda command line. You can do this in two ways. You can either open the console through the windows start menu 
 ![](./imgs/launch_prompt1.png)
 or through the Anaconda interface. For the second option, start anaconda and navigate to the ''Environments'' tab. Click the green triangle next to ''root'' and then click ''open terminal'' 
 ![](./imgs/launch_prompt2.png)
