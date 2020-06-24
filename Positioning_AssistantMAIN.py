@@ -1835,9 +1835,9 @@ if __name__=="__main__":
         pass
 
     # Create App-ID: Otherwise, the software's icon will not display propperly.
-    appid = 'OncoRay.Preclinical.MouseMurderMachine' # arbitrary string
+    appid = 'OncoRay.Preclinical.RadiAID' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
-    app.setWindowIcon(QtGui.QIcon('Backend/Icons/icon2.png'))
+    app.setWindowIcon(QtGui.QIcon('Backend/Icons/Icon_3.png'))
 
     # Create GUI + Logo and Style
     GUI = MainWindow()
