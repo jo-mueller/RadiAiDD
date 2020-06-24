@@ -1,7 +1,5 @@
 # RadiAID
 
-![](./Icons/icon.png)
-
 Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
 
 ### Setup
