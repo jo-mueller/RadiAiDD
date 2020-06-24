@@ -44,6 +44,8 @@ class Ui_IsoCenter(object):
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.Button_detectIsoCenter = QtWidgets.QPushButton(self.groupBox_2)
         self.Button_detectIsoCenter.setAutoFillBackground(False)
+        self.Button_detectIsoCenter.setCheckable(True)
+        self.Button_detectIsoCenter.setChecked(False)
         self.Button_detectIsoCenter.setDefault(True)
         self.Button_detectIsoCenter.setObjectName("Button_detectIsoCenter")
         self.gridLayout_4.addWidget(self.Button_detectIsoCenter, 0, 0, 1, 1)

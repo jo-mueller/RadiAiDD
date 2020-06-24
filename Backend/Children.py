@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import matplotlib.patches as patches
+from matplotlib.widgets  import RectangleSelector
 import numpy as np
 import traceback
-import os
-import ntpath
 import logging
 import tifffile
 import pydicom as dcm
 import scipy.optimize as opt
+import matplotlib
 
 from Backend.Containers import RadiographyImage
 
@@ -26,6 +26,7 @@ except:
     from PyQt5.QtWidgets import QMainWindow as QMain
     from PyQt5.QtWidgets import QToolBar
     from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtCore import Qt
     import PyQt5.QtCore as QtCore
     from PyQt5.QtWidgets import QInputDialog
     pyqt_version = 5
@@ -43,7 +44,6 @@ elif pyqt_version == 5:
 """ISOCENTER -Dialogue"""
 ''''''''''''''''''''''''
 
-
 class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
     "Class that contains subroutines to define isocenter from Lynx image"
 
@@ -59,9 +59,15 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
 
         # Connect buttons
         self.Button_LoadSpot.clicked.connect(self.load)
-        self.Button_detectIsoCenter.clicked.connect(self.define_ROI)
+        self.Button_detectIsoCenter.clicked.connect(self.drawRect)
         self.Button_SetIsoCenter.clicked.connect(self.LockIsoCenter)
         self.Button_Done.clicked.connect(self.Done)
+
+        # Works only after first rectangle was drawn
+        try:
+            self.Button_detectIsoCenter.clicked.connect(self.initclick)
+        except AttributeError:
+            pass
 
         # Flags and Containers
         self.Image = None
@@ -71,6 +77,66 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
 
         # Flags
         self.IsoCenter_flag = False
+
+        # Lists for isocenter markers in canvas
+        self.target_markers = []
+
+    def drawRect(self):
+
+        # Remove previous spotdetections
+        for item in self.target_markers:
+            if type(item) == matplotlib.contour.QuadContourSet:
+                [artist.set_visible(False) for artist in item.collections]
+            else:
+                item.set_visible(False)
+
+        # change cursor style
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+
+        # Rectangle selector for 2d fit
+        rectprops = dict(facecolor='orange', edgecolor=None,
+                         alpha=0.2, fill=True)
+        # drawtype is 'box' or 'line' or 'none'
+        self.RS = RectangleSelector(self.canvas.axes,
+                                    self.line_select_callback,
+                                    drawtype='box', rectprops=rectprops,
+                                    button=[1],  # don't use middle button
+                                    minspanx=5, minspany=5,
+                                    spancoords='pixels', useblit=True,
+                                    interactive=True)
+        self.canvas.draw()
+        self.bg = self.canvas.copy_from_bbox(self.RS.ax.bbox)
+        self.RS.set_visible(True)
+
+        ext = (0, 4, 0, 1)
+        self.RS.draw_shape(ext)
+
+        # Update displayed handles
+        self.RS._corner_handles.set_data(*self.RS.corners)
+        self.RS._edge_handles.set_data(*self.RS.edge_centers)
+        self.RS._center_handle.set_data(*self.RS.center)
+        for artist in self.RS.artists:
+            self.RS.ax.draw_artist(artist)
+            artist.set_animated(False)
+        self.canvas.draw()
+        self.cid = self.canvas.mpl_connect("button_press_event",
+                                           self.initclick)
+
+    def line_select_callback(self, eclick, erelease):
+        x1, y1 = eclick.xdata, eclick.ydata
+        x2, y2 = erelease.xdata, erelease.ydata
+
+        p1 = (x1, y1)
+        p2 = (x2, y2)
+
+        self.spotDetect(p1, p2)
+
+    def initclick(self, evt):
+        self.RS.background = self.bg
+        self.RS.update()
+        for artist in self.RS.artists:
+            artist.set_animated(True)
+        self.canvas.mpl_disconnect(self.cid)
 
     def load(self):
         "load radiography image of beam IsoCenter"
@@ -105,105 +171,6 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         self.canvas.draw()
         logging.info('{:s} imported as Isocenter Radiography'.format(fname))
 
-    def define_ROI(self):
-        "Specify a ROI within which the bed contours can be found"
-
-        print(self.Button_detectIsoCenter.isChecked())
-
-        # If button is pressed and user wants to un-press it:
-        if self.Button_detectIsoCenter.isChecked():
-            self.Button_detectIsoCenter.setChecked(False)
-            self.Button_detectIsoCenter.setStyleSheet('border: '
-                                                      '2px solid #343434;')
-            return 0
-
-        self.Button_detectIsoCenter.setChecked(True)
-        self.Button_detectIsoCenter.setStyleSheet('border: '
-                                                  '2px solid QLinearGradient('
-                                                  'x1: 0, y1: 0, '
-                                                  'x2: 0, y2: 1, '
-                                                  'stop: 0 #ffa02f, '
-                                                  'stop: 1 #d7801a);')
-
-        # If rects or other markers are visible, remove
-        for rect in self.rects:
-            rect.remove()
-        self.rects = []
-        for marker in self.target_markers:
-            marker.remove()
-        self.target_markers = []
-
-        self.canvas.draw()
-
-        self.connect()
-        self.canvas.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.canvas.setFocus()
-        self.canvas.draw()
-
-    def connect(self):
-        'connect to all the events needed'
-        self.cidpress = self.canvas.mpl_connect(
-            'button_press_event', self.on_press)
-        self.cidrelease = self.canvas.mpl_connect(
-            'button_release_event', self.on_release)
-        self.cidmotion = self.canvas.mpl_connect(
-            'motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-        'on button press we will see if the mouse is'
-        'over us and store some data'
-        # Existiert schon ein Rechteck? Falls nein
-        if not self.rects:  # Neues Rechteck malen
-            self.rect = self.canvas.axes.add_patch(
-                patches.Rectangle((event.xdata, event.ydata),
-                                  0, 0, fill=False))
-            self.rects.append(self.rect)
-        else:  # Altes Rechteck/Konturlinien weg und neu malen
-            for rect in self.rects:
-                rect.remove()
-                self.rects = []
-
-            self.rect = self.canvas.axes.add_patch(
-                patches.Rectangle((event.xdata, event.ydata),
-                                  0, 0, fill=True))
-            self.rects.append(self.rect)
-
-        # Ursprungskoordinaten in self.press hinterlegen.
-        # self.press enthält nur werte wenn geklickt wurde!
-        self.press = self.rect.xy
-        self.canvas.draw()
-
-    def on_motion(self, event):
-        'on motion move the boundaries of the rect to cursor location'
-        #  Is the button pushed or have values been stored in self.press?
-        if self.press is None:
-            return 0
-        x0, y0 = self.press
-
-        if event.xdata < x0:
-            self.rect.set_x(event.xdata)
-        if event.ydata < y0:
-            self.rect.set_y(event.ydata)
-
-        # set to square for fitting purpose
-        self.rect.set_width(abs(event.xdata - x0))
-        self.rect.set_height(abs(event.xdata - x0))
-        self.canvas.draw()
-
-    def on_release(self, event):
-        'on release we reset the press data and disconnect'
-        self.press = None
-        self.canvas.draw()
-
-        self.canvas.mpl_disconnect(self.cidpress)
-        self.canvas.mpl_disconnect(self.cidrelease)
-        self.canvas.mpl_disconnect(self.cidmotion)
-
-        self.spotDetect()
-        self.Button_detectIsoCenter.setChecked(False)
-        self.Button_detectIsoCenter.setStyleSheet('border-width: 1px;')
-        self.Button_detectIsoCenter.setStyleSheet('border-color: #1e1e1e;')
-
     def LockIsoCenter(self):
         """ Read current values from sliders/ spot location text fields
         and set as final isocenter coordinates to be used for the
@@ -236,15 +203,18 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         self.SpotTxt_y.setStyleSheet("color: rgb(0, 0, 0);")
         self.IsoCenter_flag = False
 
-    def spotDetect(self):
+    def spotDetect(self, p1, p2):
         " Function that is invoked by ROI selection, autodetects earpin"
-        # Get ROI limits from drawn rectangle
-        x = int(np.floor(self.rect.get_x()))
-        y = int(np.floor(self.rect.get_y()))
 
-        # get data selection from inside the rectangle
-        width = int(np.floor(self.rect.get_width()))
-        height = int(np.floor(self.rect.get_height()))
+        # Restore old cursor
+        QApplication.restoreOverrideCursor()
+
+        # Get ROI limits from drawn rectangle corners
+        x = int(min(p1[0], p2[0]) + 0.5)
+        y = int(min(p1[1], p2[1]) + 0.5)
+        width = int(np.abs(p1[0] - p2[0]) + 0.5)
+        height = int(np.abs(p1[1] - p2[1]) + 0.5)
+
         subset = self.Image.array[y: y + height, x: x + width]
 
         # Calculate fit function values
@@ -262,9 +232,11 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         data_fitted = twoD_Gaussian((xx, yy), *popt)
 
         # Print markers into image
-        self.canvas.axes.contour(xx, yy, data_fitted.reshape(yrange, xrange), 5)
-        self.target_markers.append(self.canvas.axes.axvline(popt[1], 0, self.canvas.axes.get_ylim()[1]))
-        self.target_markers.append(self.canvas.axes.axhline(popt[2], 0, self.canvas.axes.get_xlim()[1]))
+        ax = self.canvas.axes
+        self.target_markers.append(ax.contour(xx, yy, data_fitted.reshape(
+                                    yrange, xrange), 5))
+        self.target_markers.append(ax.axvline(popt[1], 0, ax.get_ylim()[1]))
+        self.target_markers.append(ax.axhline(popt[2], 0, ax.get_xlim()[1]))
         self.canvas.draw()
 
         self.SpotTxt_x.setValue(popt[1])
@@ -289,20 +261,20 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
             self.close()
 
 
-
-
 ''''''''''''''''''''''''
 """Landmark -Dialogue"""
 ''''''''''''''''''''''''
+
+
 class Landmark_Child(QMain, Landmark.Ui_Landmark):
     "Class that contains subroutines to define isocenter from Lynx image"
+
     def __init__(self, parent, Owner):
         super(Landmark_Child, self).__init__(parent)
 
         self.setupUi(self)
-        self.parent = parent # GUI instance
+        self.parent = parent  # GUI instance
         self.Owner = Owner
-        # self.image_data = Owner.Radiography_scatter
 
         # Data container
         self.Image = None
@@ -320,23 +292,83 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
 
         # Set up different segmentation procedures
         # define ROI for earpin autodetection
-        self.Button_defineROI.clicked.connect(self.define_ROI)
+        self.Button_defineROI.clicked.connect(self.drawRect)
 
-        #Buttons about earpin definition
-        self.Button_LoadLandmark.clicked.connect(self.load) # Load Radiography image
-        self.Button_accptPxSpace.clicked.connect(self.accept_spacing) # set bed values and disconnect all sliders and pass values relevant for spacing to parent
-        self.Button_lockEarpin.clicked.connect(self.Lock_Landmarks) # pass values about landmarks to parent
+        # Buttons about earpin definition
+        # Load Radiography image
+        self.Button_LoadLandmark.clicked.connect(self.load)
+        # set bed values and disconnect all sliders
+        self.Button_accptPxSpace.clicked.connect(self.accept_spacing)
+        # pass values about landmarks to parent
+        self.Button_lockEarpin.clicked.connect(self.Lock_Landmarks)
 
         # Finish
         self.Button_Done.clicked.connect(self.Done)
 
-        #Flags and Containers
+        # Flags and Containers
         self.press = None
         self.rects = []
         self.target_markers = []
 
         self.Landmark_flag = False
-        self.Spacing_flag  = False
+        self.Spacing_flag = False
+
+    def drawRect(self):
+
+        # Remove previous spotdetections
+        for item in self.target_markers:
+            if type(item) == matplotlib.contour.QuadContourSet:
+                [artist.set_visible(False) for artist in item.collections]
+            else:
+                item.set_visible(False)
+
+        # change cursor style
+        QApplication.setOverrideCursor(Qt.CrossCursor)
+
+        # Rectangle selector for 2d fit
+        rectprops = dict(facecolor='orange', edgecolor=None,
+                         alpha=0.2, fill=True)
+        # drawtype is 'box' or 'line' or 'none'
+        self.RS = RectangleSelector(self.canvas.axes,
+                                    self.line_select_callback,
+                                    drawtype='box', rectprops=rectprops,
+                                    button=[1],  # don't use middle button
+                                    minspanx=5, minspany=5,
+                                    spancoords='pixels', useblit=True,
+                                    interactive=True)
+        self.canvas.draw()
+        self.bg = self.canvas.copy_from_bbox(self.RS.ax.bbox)
+        self.RS.set_visible(True)
+
+        ext = (0, 4, 0, 1)
+        self.RS.draw_shape(ext)
+
+        # Update displayed handles
+        self.RS._corner_handles.set_data(*self.RS.corners)
+        self.RS._edge_handles.set_data(*self.RS.edge_centers)
+        self.RS._center_handle.set_data(*self.RS.center)
+        for artist in self.RS.artists:
+            self.RS.ax.draw_artist(artist)
+            artist.set_animated(False)
+        self.canvas.draw()
+        self.cid = self.canvas.mpl_connect("button_press_event",
+                                           self.initclick)
+
+    def line_select_callback(self, eclick, erelease):
+        x1, y1 = eclick.xdata, eclick.ydata
+        x2, y2 = erelease.xdata, erelease.ydata
+
+        p1 = (x1, y1)
+        p2 = (x2, y2)
+
+        self.pinDetect(p1, p2)
+
+    def initclick(self, evt):
+        self.RS.background = self.bg
+        self.RS.update()
+        for artist in self.RS.artists:
+            artist.set_animated(True)
+        self.canvas.mpl_disconnect(self.cid)
 
     def load(self):
         "load radiography image of object radiography"
@@ -369,8 +401,29 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         self.canvas.axes.imshow(self.Image.array, cmap='gray',
                                 zorder=1, origin='lower')
         self.canvas.draw()
-        self.calcspacing()  #recalculate spacing with new image
+        self.calcspacing()  # recalculate spacing with new image
         logging.info('{:s} imported as Isocenter Radiography'.format(fname))
+        
+        self.gettablecoords()  # get motor coordinates for this image
+
+    def gettablecoords(self):
+        """Function that is called upon upload of radiography
+        that prompts user to enter table coordinates"""
+
+        x, okx = QInputDialog.getDouble(self, 'Table position: X', 'x_table:',
+                                        0.0, decimals=4)
+        y, oky = QInputDialog.getDouble(self, 'Table position: Y', 'y_table:',
+                                        0.0, decimals=4)
+
+        if not okx or not oky:
+            self.parent.TableTxt_x.setText('X Value not set!!')
+            self.parent.TableTxt_y.setText('Y Value not set!!')
+        else:
+            self.parent.TableTxt_x.setText('{:2.4f}'.format(x))
+            self.parent.TableTxt_y.setText('{:2.4f}'.format(y))
+
+        self.parent.TableTxt_x.setStyleSheet("color: #b1b1b1;")
+        self.parent.TableTxt_y.setStyleSheet("color: #b1b1b1;")
 
     def calcspacing(self):
         """Calculate new pixel spacing based upon distances between
@@ -387,97 +440,18 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         except AttributeError:
             pass
 
-    def define_ROI(self):
-        "Specify a ROI within which the bed contours can be found"
 
-        self.Button_defineROI.setChecked(True)
-        self.Button_defineROI.setStyleSheet('border: 2px solid '
-                                            'QLinearGradient( '
-                                            'x1: 0, y1: 0, '
-                                            'x2: 0, y2: 1, '
-                                            'stop: 0 #ffa02f, '
-                                            'stop: 1 #d7801a);')
-
-        # If rects or other markers are visible, remove
-        for rect in self.rects:
-            rect.remove()
-        self.rects = []
-        for marker in self.target_markers:
-            marker.remove()
-        self.target_markers = []
-
-        self.Display_Landmarks.canvas.draw()
-
-        self.connect()
-        self.canvas.setFocusPolicy(QtCore.Qt.ClickFocus)
-        self.canvas.setFocus()
-        self.canvas.draw()
-
-
-    def connect(self):
-        'connect to all the events we need'
-        self.cidpress = self.canvas.mpl_connect(
-            'button_press_event', self.on_press)
-        self.cidrelease = self.canvas.mpl_connect(
-            'button_release_event', self.on_release)
-        self.cidmotion = self.canvas.mpl_connect(
-            'motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-        'on button press we will see if the mouse is over us and store some data'
-        #Existiert schon ein Rechteck? Falls nein
-        if not self.rects: # Neues Rechteck malen
-            self.rect = self.canvas.axes.add_patch(patches.Rectangle((event.xdata,event.ydata), 0, 0 , fill = False))
-            self.rects.append(self.rect)
-        else: #Altes Rechteck/Konturlinien weg und neu malen
-            for rect in self.rects:
-                rect.remove()
-                self.rects = []
-
-            self.rect = self.canvas.axes.add_patch(patches.Rectangle((event.xdata,event.ydata), 0, 0 , fill = False))
-            self.rects.append(self.rect)
-
-        # Ursprungskoordinaten in self.press hinterlegen. self.press enthält nur werte wenn geklickt wurde!
-        self.press = self.rect.xy
-        self.canvas.draw()
-
-    def on_motion(self, event):
-        'on motion move the boundaries of the rect to cursor location'
-        #  Is the button pushed or have values been stored in self.press, respectively?
-        if self.press is None: return
-        x0, y0 = self.press
-
-        if event.xdata < x0:
-            self.rect.set_x(event.xdata)
-        if event.ydata < y0:
-            self.rect.set_y(event.ydata)
-
-        self.rect.set_width(abs(event.xdata - x0))
-        self.rect.set_height(abs(event.xdata - x0)) #set to square for fitting purpose
-        self.canvas.draw()
-
-    def on_release(self, event):
-        'on release we reset the press data and disconnect'
-        self.press = None
-        self.canvas.draw()
-
-        self.canvas.mpl_disconnect(self.cidpress)
-        self.canvas.mpl_disconnect(self.cidrelease)
-        self.canvas.mpl_disconnect(self.cidmotion)
-
-        self.pinDetect()
-        self.Button_defineROI.setChecked(False)
-        self.Button_defineROI.setStyleSheet('border-width: 1px;')
-        self.Button_defineROI.setStyleSheet('border-color: #1e1e1e;')
-
-    def pinDetect(self):
+    def pinDetect(self, p1, p2):
         " Function that is invoked by ROI selection, autodetects earpin"
-        # Get ROI limits from drawn rectangle
-        x = int(np.floor(self.rect.get_x()))
-        y = int(np.floor(self.rect.get_y()))
 
-        width = int(np.floor(self.rect.get_width()))
-        height = int(np.floor(self.rect.get_height()))
+        # Restore old cursor
+        QApplication.restoreOverrideCursor()
+
+        # Get ROI limits from drawn rectangle corners
+        x = int(min(p1[0], p2[0]) + 0.5)
+        y = int(min(p1[1], p2[1]) + 0.5)
+        width = int(np.abs(p1[0] - p2[0]) + 0.5)
+        height = int(np.abs(p1[1] - p2[1]) + 0.5)
 
         # get data selection from inside the rectangle and invert
         subset = self.Image.array[y: y + height, x: x + width]
@@ -498,9 +472,11 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
         data_fitted = twoD_Gaussian((xx, yy), *popt)
 
         # Print markers into image
-        self.canvas.axes.contour(xx, yy, data_fitted.reshape(yrange, xrange), 5)
-        self.target_markers.append(self.canvas.axes.axvline(popt[1], 0, self.canvas.axes.get_ylim()[1]))
-        self.target_markers.append(self.canvas.axes.axhline(popt[2], 0, self.canvas.axes.get_xlim()[1]))
+        ax = self.canvas.axes
+        self.target_markers.append(
+            ax.contour(xx, yy, data_fitted.reshape(yrange, xrange), 5))
+        self.target_markers.append(ax.axvline(popt[1], 0, ax.get_ylim()[1]))
+        self.target_markers.append(ax.axhline(popt[2], 0, ax.get_xlim()[1]))
         self.canvas.draw()
 
         self.TxtEarpinX.setValue(popt[1])
@@ -523,8 +499,6 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
 
         # Pass spacing to parent
         self.Owner.return_spacing(self.Spacing)
-        print("what I returned:")
-        print(self.Spacing)
 
         # Raise Flag
         self.Spacing_flag = True
