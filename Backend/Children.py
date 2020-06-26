@@ -48,10 +48,11 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
     "Class that contains subroutines to define isocenter from Lynx image"
 
     def __init__(self, parent, owner):
-        super(IsoCenter_Child, self).__init__(parent)
+        super(IsoCenter_Child, self).__init__()
 
         self.Owner = owner
         self.setupUi(self)
+        self.setStyleSheet(parent.styleSheet())
 
         self.parent = parent
         self.canvas = self.Display_IsoCenter.canvas
@@ -270,11 +271,12 @@ class Landmark_Child(QMain, Landmark.Ui_Landmark):
     "Class that contains subroutines to define isocenter from Lynx image"
 
     def __init__(self, parent, Owner):
-        super(Landmark_Child, self).__init__(parent)
+        super(Landmark_Child, self).__init__()
 
         self.setupUi(self)
         self.parent = parent  # GUI instance
         self.Owner = Owner
+        self.setStyleSheet(parent.styleSheet())
 
         # Data container
         self.Image = None

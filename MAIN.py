@@ -996,11 +996,16 @@ class XRay(object):
             GUI.Button_WipePositioning.clicked.connect(self.wipe_positioning)
 
             # Assign containers
-            self.StructureSet       = RTstruct()
-            self.Planar_Scans       = OverlayImage()
-            self.PatientPosition    = []
-            self.Crosshair_Target   = Crosshair()
-            self.Crosshair_Repo     = Crosshair()
+            self.StructureSet = RTstruct()
+            self.Planar_Scans = OverlayImage()
+            self.PatientPosition = []
+            self.Crosshair_Target = Crosshair()
+            self.Crosshair_Repo = Crosshair()
+            self.Mousepath = ""
+            self.UID_CT = ""
+            self.UID_RTstruct = ""
+            self.UID_treat = ""
+            self.UID_plan = ""
 
             GUI.Display_Plan_Hist.findChild(QToolBar).setVisible(False)
             GUI.Display_Plan.findChild(QToolBar).setVisible(False)
@@ -1111,9 +1116,12 @@ class XRay(object):
                     Hint = QMessage()
                     Hint.setIcon(QMessage.Information)
                     Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-                    Hint.setText("Warning: CT Patient UID ({:s}) and RTstruct UID ({:s}) do not match. \nProceed?".format(self.UID_CT, self.UID_RTstruct))
-                    proceed = Hint.exec_()
-                else: proceed = QMessage.Ok
+                    Hint.setText("Warning: CT Patient name ({:s}) and "
+                                 "RTstruct UID ({:s}) do not match. "
+                                 "\nProceed?".format(self.UID_CT,
+                                                     proceed = Hint.exec_()))
+                else:
+                    proceed = QMessage.Ok
 
                 if proceed == QMessage.Cancel:
                     logging.error('UID missmatch detected. Review RTstruct and CT files')
@@ -1147,6 +1155,37 @@ class XRay(object):
         except Exception:
             logging.debug(traceback.print_exc())
 
+    def consistency_check(self):
+        """
+        checks all currently set User IDs (aka patient names)
+        from the different modalities. If the user accidently loaded the wrong
+        CT image data/structure set/planar image, this check will
+        notice
+        """
+        UIDs = [self.UID_CT, self.UID_RTstruct, self.UID_plan, self.UID_treat]
+        UIDs = [x for x in UIDs if x != ""]  # remove None-UIds
+
+        # check how many unique usernames where used
+        # and point out any inconsistencies
+        if len(list(set(UIDs))) > 1:
+            Hint = QMessage()
+            Hint.setIcon(QMessage.Information)
+            Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
+            Hint.setText("Different patient names detected in input data: "
+                         "\nCT patient name: {:s}"
+                         "\nRTstruct patient name: {:s}"
+                         "\nPlanning planar image patient name: {:s}"
+                         "\nTreatment planar image patient name: {:s}"
+                         "\nProceed?".format(self.UID_CT, self.UID_RTstruct,
+                                             self.UID_plan, self.UID_treat))
+            proceed = Hint.exec_()
+            if proceed == QMessage.Cancel:
+                return False
+            else:
+                return True
+        else:
+            return True
+
     def loadPlanarXRay_Plan(self):
         """Function to be invoked for zupload of planar XRay image from Plan"""
 
@@ -1168,48 +1207,32 @@ class XRay(object):
             self.Mousepath = os.path.normpath('\\\\g40fs3\\H-Team\\Experimente\\')
 
         # Get filename
-        fname, _ = Qfile.getOpenFileName(GUI, 'Open file', self.Mousepath,"Dicom files (*.dcm)")
+        fname, _ = Qfile.getOpenFileName(GUI, 'Open file',
+                                         self.Mousepath, "Dicom files (*.dcm)")
 
         if not fname:
             return 0
         else:
 
             # Load dicom data and read pixel array
-            meta  = dicom.read_file(fname)
-
-            # Check UIDs of Planar scan and CT/RTstruct
-            if meta.PatientID != self.UID_CT:
-                Hint = QMessage()
-                Hint.setIcon(QMessage.Information)
-                Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-                Hint.setText("Warning: Planar Scan UID ({:s}) and CT UID ({:s}) missmatch. \nProceed?".format(meta.PatientID, self.UID_CT))
-                proceed = Hint.exec_()
-                if proceed == QMessage.Cancel:
-                    logging.info('Aborted import.')
-                    return 0
-                else:
-                    logging.warning('Planar Scan UID ({:s}) and CT UID ({:s}) missmatch. Proceeding.'.format(meta.PatientID, self.UID_CT))
-
-            if meta.PatientID != self.UID_RTstruct:
-                Hint = QMessage()
-                Hint.setIcon(QMessage.Information)
-                Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-                Hint.setText("Warning: Planar Scan UID ({:s}) and RTstruct UID ({:s}) missmatch. \nProceed?".format(meta.PatientID, self.UID_RTstruct))
-                proceed = Hint.exec_()
-                if proceed == QMessage.Cancel:
-                    return 0
-                else:
-                    logging.warning('Planar Scan UID ({:s}) and RTstruct UID ({:s}) missmatch. Proceeding.'.format(meta.PatientID, self.UID_RTstruct))
+            meta = dicom.read_file(fname)
+            self.UID_plan = meta.PatientID
+            if self.consistency_check():
+                pass
+            else:
+                return 0
 
             self.Planar_Scans.Plan = np.rot90(meta.pixel_array)
 
-            GUI.Display_Plan.canvas.axes.imshow(self.Planar_Scans.Plan, cmap = 'gray', origin = 'lower')
+            GUI.Display_Plan.canvas.axes.imshow(self.Planar_Scans.Plan,
+                                                cmap='gray', origin='lower')
             GUI.Display_Plan.canvas.draw()
-            GUI.Display_Plan_Hist.canvas.axes.hist(self.Planar_Scans.Plan.flatten(), 200)
+            GUI.Display_Plan_Hist.canvas.axes.hist(
+                self.Planar_Scans.Plan.flatten(), 200)
             GUI.Display_Plan_Hist.canvas.draw()
             GUI.txt_file_Plan.setText(fname)
 
-            #Assign Gray Window
+            # Assign Gray Window
             self.PlanGrayWindow = GrayWindow(GUI.Slider_Plan_GV_center,
                                              GUI.Slider_Plan_GV_range,
                                              GUI.Txt_Plan_GV_center,
@@ -1244,46 +1267,30 @@ class XRay(object):
             self.Mousepath = os.path.normpath('\\g40fs3\H-Team\Experimente')
 
         # Get filename
-        fname = Qfile.getOpenFileName(GUI, 'Open file', self.Mousepath,"Dicom files (*.dcm)")[0]
+        fname = Qfile.getOpenFileName(GUI, 'Open file',
+                                      self.Mousepath, "Dicom files (*.dcm)")[0]
 
         # If loading was cancelled:
         if not fname:
             return 0
         else:
             # Load dicom data and read pixel array
-            meta  = dicom.read_file(fname)
+            meta = dicom.read_file(fname)
+            self.UID_treat = meta.PatientID
+            if self.consistency_check():
+                pass
+            else:
+                return 0
 
-            # Check UIDs of Planar scan and CT/RTstruct
-            if meta.PatientID != self.UID_CT:
-                Hint = QMessage()
-                Hint.setIcon(QMessage.Information)
-                Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-                Hint.setText("Warning: Planar Scan UID {:s} and CT UID {:s} do not match. \n Proceed?".format(meta.PatientID, self.UID_CT))
-                proceed = Hint.exec_()
-                if proceed == QMessage.Cancel:
-                    print('Import aborted')
-                    return 0
-                else:
-                    logging.warning('Planar Scan UID ({:s}) and CT UID ({:s}) missmatch. Proceeding.'.format(meta.PatientID, self.UID_CT))
-
-            if meta.PatientID != self.UID_RTstruct:
-                Hint = QMessage()
-                Hint.setIcon(QMessage.Information)
-                Hint.setStandardButtons(QMessage.Ok | QMessage.Cancel)
-                Hint.setText("Warning: Planar Scan UID {:s} and RTstruct UID {:s} do not match. \n Proceed?".format(meta.PatientID, self.UID_RTstruct))
-                proceed = Hint.exec_()
-                if proceed == QMessage.Cancel:
-                    print('Import aborted')
-                    return 0
-                else:
-                    logging.warning('Planar Scan UID ({:s}) and RTstruct UID ({:s}) missmatch. Proceeding.'.format(meta.PatientID, self.UID_RTstruct))
-
-
+            # load planar image
             self.Planar_Scans.Treat = np.rot90(meta.pixel_array)
 
-            GUI.Display_Treatment.canvas.axes.imshow(self.Planar_Scans.Treat, cmap = 'gray', origin = 'lower')
+            GUI.Display_Treatment.canvas.axes.imshow(self.Planar_Scans.Treat,
+                                                     cmap='gray',
+                                                     origin='lower')
             GUI.Display_Treatment.canvas.draw()
-            GUI.Display_Treatment_Hist.canvas.axes.hist(self.Planar_Scans.Treat.flatten(), 200)
+            GUI.Display_Treatment_Hist.canvas.axes.hist(
+                self.Planar_Scans.Treat.flatten(), 200)
             GUI.Display_Treatment_Hist.canvas.draw()
             GUI.txt_file_Treatment.setText(fname)
 
@@ -1292,28 +1299,30 @@ class XRay(object):
 
             # Assign GrayWindow control
             self.TreatGrayWindow = GrayWindow(GUI.Slider_Treat_GV_center,
-                                         GUI.Slider_Treat_GV_range,
-                                         GUI.Txt_Treat_GV_center,
-                                         GUI.Txt_Treat_GV_range,
-                                         GUI.Display_Treatment.canvas,
-                                         GUI.Display_Treatment_Hist.canvas,
-                                         self.Planar_Scans.Treat)
+                                              GUI.Slider_Treat_GV_range,
+                                              GUI.Txt_Treat_GV_center,
+                                              GUI.Txt_Treat_GV_range,
+                                              GUI.Display_Treatment.canvas,
+                                              GUI.Display_Treatment_Hist.canvas,
+                                              self.Planar_Scans.Treat)
 
-            # Raise flag and attempt start of comparison between Plan and Treatment
+            # Raise flag and attempt start of comparison
+            # between Plan and Treatment
             Checklist.Planar_scan_Treat = True
             self.compare()
             logging.info('Imported Treatment Planar Image {:s}'.format(fname))
 
     def compare(self):
         """universal function to initialize comparison of
-        Plan image and treatment image"""
-        #When both images are provided:
+        Plan image and treatment image once both are loaded"""
+        # When both images are provided:
         if Checklist.Planar_scan_Plan and Checklist.Planar_scan_Treat:
             # Store data in respective Container
             self.Planar_Scans.init()
-            GUI.Display_Overlay_Hist.canvas.axes.hist(self.Planar_Scans.Plan.flatten(), 200)
+            GUI.Display_Overlay_Hist.canvas.axes.hist(
+                self.Planar_Scans.Plan.flatten(), 200)
 
-            #Enable toolboxes for movement
+            # Enable toolboxes for movement
             GUI.Planar_Scan_Toolbox.setEnabled(True)
             GUI.group_move_Overlay.setEnabled(True)
             GUI.group_move_Overlay_2.setEnabled(True)
@@ -1322,9 +1331,9 @@ class XRay(object):
             self.update_overlay(self.Planar_Scans,
                                 GUI.Display_Overlay.canvas,
                                 GUI.Display_FalseColor.canvas,
-                                GUI.Display_Difference.canvas, first = True)
+                                GUI.Display_Difference.canvas, first=True)
 
-            #For safety reasons: Disconnect all
+            # For safety reasons: Disconnect all
             try:
                 GUI.Button_UP.clicked.disconnect()
                 GUI.Button_DOWN.clicked.disconnect()
@@ -1336,27 +1345,27 @@ class XRay(object):
             except Exception:
                 pass
 
-            #Connect buttons and text
+            # Connect buttons and text
             GUI.Button_UP.clicked.connect(lambda:   self.move_overlay([+1, 0]))
             GUI.Button_DOWN.clicked.connect(lambda: self.move_overlay([-1, 0]))
             GUI.Button_LEFT.clicked.connect(lambda: self.move_overlay([ 0,-1]))
             GUI.Button_RIGHT.clicked.connect(lambda:self.move_overlay([ 0,+1]))
             GUI.Button_RESET.clicked.connect(self.reset_overlay)
             GUI.Slider_Planar_Overlay.valueChanged.connect(self.adjust_alpha)
-            GUI.Planar_Scan_Toolbox.currentChanged.connect(lambda: self.update_overlay(self.Planar_Scans,
-                                                                                      GUI.Display_Overlay.canvas,
-                                                                                      GUI.Display_FalseColor.canvas,
-                                                                                      GUI.Display_Difference.canvas))
-
+            GUI.Planar_Scan_Toolbox.currentChanged.connect(
+                lambda: self.update_overlay(self.Planar_Scans,
+                                            GUI.Display_Overlay.canvas,
+                                            GUI.Display_FalseColor.canvas,
+                                            GUI.Display_Difference.canvas))
 
             # Assign GrayWindow Handler to Overlay and Difference image
             self.OverlayGrayWindow = GrayWindow(GUI.Slider_Overlay_GV_center,
-                                            GUI.Slider_Overlay_GV_range,
-                                            GUI.Txt_Overlay_GV_center,
-                                            GUI.Txt_Overlay_GV_range,
-                                            GUI.Display_Overlay.canvas,
-                                            GUI.Display_Overlay_Hist.canvas,
-                                            self.Planar_Scans.Plan)
+                                                GUI.Slider_Overlay_GV_range,
+                                                GUI.Txt_Overlay_GV_center,
+                                                GUI.Txt_Overlay_GV_range,
+                                                GUI.Display_Overlay.canvas,
+                                                GUI.Display_Overlay_Hist.canvas,
+                                                self.Planar_Scans.Plan)
 
             self.DifferenceGrayWindow = GrayWindow(GUI.Slider_Difference_GV_center,
                                                    GUI.Slider_Difference_GV_range,
@@ -1367,12 +1376,15 @@ class XRay(object):
                                                    self.Planar_Scans.get_diff())
 
     def wipe_positioning(self):
-        """If pressed, this removes all data about current repositioning session"""
+        """
+        If pressed, this removes all data
+        about current repositioning session
+        """
 
-        #Move vectors back to zero
+        # Move vectors back to zero
         try:
             self.reset_overlay()
-        except:
+        except Exception:
             pass
 
         # Remove plan
@@ -1382,14 +1394,14 @@ class XRay(object):
         GUI.Display_Plan_Hist.canvas.draw()
         GUI.txt_file_Plan.setText('')
 
-        #Remove Treatment data
+        # Remove Treatment data
         GUI.Display_Treatment.canvas.axes.clear()
         GUI.Display_Treatment.canvas.draw()
         GUI.Display_Treatment_Hist.canvas.axes.clear()
         GUI.Display_Treatment_Hist.canvas.draw()
         GUI.txt_file_Treatment.setText('')
 
-        #Remove overlays
+        # Remove overlays
         GUI.Display_Overlay.canvas.axes.clear()
         GUI.Display_Overlay.canvas.draw()
         GUI.Display_FalseColor.canvas.axes.clear()
@@ -1401,11 +1413,11 @@ class XRay(object):
         GUI.Display_Difference_Hist.canvas.axes.clear()
         GUI.Display_Difference_Hist.canvas.draw()
 
-        #Remove calculated table coordinates
+        # Remove calculated table coordinates
         GUI.TableTxt_xCorr.setText('')
         GUI.TableTxt_yCorr.setText('')
 
-        #Remove CT data
+        # Remove CT data
         GUI.Text_XR_Filename.setText('')
 
         GUI.TxtXRPinX.setText('')
@@ -1414,7 +1426,7 @@ class XRay(object):
         GUI.TxtTrgtY.setText('')
 
         GUI.Txt_Mouse_ID.setText('')
-        GUI.Txt_CT_date.setText( '')
+        GUI.Txt_CT_date.setText('')
         GUI.Txt_CT_detect_pos.setText('')
         GUI.LabelPosition.setText('Patient Position: ')
 
@@ -1432,8 +1444,7 @@ class XRay(object):
         self.UID_CT = []
         self.UID_RTstruct = []
 
-        logging.info('=============== POSITIONING DATA REMOVED ===============')
-
+        logging.info('============= POSITIONING DATA REMOVED =============')
 
     def toggle_target(self):
         """Function that projects target into Radiography image"""
@@ -1494,41 +1505,48 @@ class XRay(object):
         GUI.Display_Overlay.canvas.draw()
 
 
-    def update_overlay(self, Overlay_container, canvas_overlay, canvas_FC, canvas_diff, first = False):
-        """Function that repaints all images that are necessary for overlay
-        of planar X-Ray scans"""
+    def update_overlay(self, Overlay_container, canvas_overlay,
+                       canvas_FC, canvas_diff, first=False):
+        """
+        Function that repaints all images that are necessary for overlay
+        of planar X-Ray scans
+        """
 
         # If function is called for the first time:
         # Print all images once with default setting to initialize settings
         if first:
             # Set up new Overlay and set clim
             canvas_overlay.axes.imshow(Overlay_container.get_plan(),
-                                                interpolation='nearest',
-                                                cmap = 'gray', alpha = 0.5,
-                                                origin = 'lower')
+                                       interpolation='nearest',
+                                       cmap='gray', alpha=0.5,
+                                       origin='lower')
             canvas_overlay.axes.imshow(Overlay_container.get_treat(),
-                                                interpolation='nearest',
-                                                cmap = 'gray', alpha = 0.5,
-                                                origin = 'lower')
+                                       interpolation='nearest',
+                                       cmap='gray', alpha=0.5,
+                                       origin='lower')
             canvas_overlay.draw()
-            canvas_FC.axes.imshow(Overlay_container.get_rgb(), origin = 'lower')
+
+            # False-color image
+            FC = canvas_FC.axes.imshow(Overlay_container.get_rgb(),
+                                       origin='lower')
             canvas_FC.draw()
-            canvas_diff.axes.imshow(Overlay_container.get_diff(), cmap = 'gray',
-                                origin = 'lower')
+
+            # difference image
+            canvas_diff.axes.imshow(Overlay_container.get_diff(), cmap='gray',
+                                    origin='lower')
+            FC.set_clim(0, 0.5)
             canvas_diff.draw()
             return 0
 
-
-
         # depending on which tool is selected, do not redraw all
         if GUI.Planar_Scan_Toolbox.currentIndex() == 0:
-            #if Overlay is selected:
+            # if Overlay is selected:
             # Get clims and xlims from Slider/image
             clim_overlay = (int(GUI.Slider_Overlay_GV_center.value()),
                             int(GUI.Slider_Overlay_GV_range.value()))
-            xlims        = canvas_overlay.axes.get_xlim()
-            ylims        = canvas_overlay.axes.get_ylim()
-            alpha        = canvas_overlay.axes.get_alpha()
+            xlims = canvas_overlay.axes.get_xlim()
+            ylims = canvas_overlay.axes.get_ylim()
+            alpha = canvas_overlay.axes.get_alpha()
 
             # Clear
             canvas_overlay.axes.clear()
@@ -1778,6 +1796,7 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
 if __name__=="__main__":
 
     root = os.getcwd()
+    stylefile = os.path.join(root, 'Backend','Style', 'stylefile.qss')
 
     #Assign Checklist
     Checklist = Check()
@@ -1796,8 +1815,7 @@ if __name__=="__main__":
 
     # Create GUI + Logo and Style
     GUI = MainWindow()
-    GUI.setStyleSheet(open(os.path.join(root, 'Backend','Style',
-                                        'stylefile.qss'), "r").read())
+    GUI.setStyleSheet(open(stylefile, "r").read())
     GUI.show()
 
     # Make Logo

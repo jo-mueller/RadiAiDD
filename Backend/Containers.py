@@ -36,153 +36,6 @@ class RadiographyImage(object):
         self.array = array
         self.pw = pw
 
-# class Lynx(object):
-#     """Central class representing the measurement from the Lynx device"""
-#     def __init__(self):
-
-#         self.protonEnergy = 0
-#         self.measDepth = 0
-#         self.measMaterial = ""
-#         self.comment = ""
-#         self.fileOK = False
-#         self.dataOK = False
-#         self.MUcorr = False
-#         self.data =  []
-#         self.dcmDat = None
-#         self.filename = None
-
-#         self.xrange = [-np.inf,  np.inf]
-#         self.yrange = [-np.inf, np.inf]
-
-
-#     def load(self, filename):
-#         """ Import function to actually read the dicom/png file,
-#             uses the filename, which was provided during initialization of the
-#             Lynx object.
-#             Requires a proper installed pydicom package.
-#             If you are using Python3, you might be interested in the module 2to3
-#             to convert pydicom for Pythton 2.7 to Python3
-#         """
-#         self.filename = os.path.expanduser(filename)                 # get rid of '~' in filename
-#         self.path = os.path.dirname(self.filename)                   # path to data
-#         self.filenameBare = os.path.splitext(self.filename)[0]       # filename without suffix
-
-#         if not(os.access(self.filename, os.R_OK)):
-#             print ("ERR: Could not access {0:s} for reading! Check filename.".format(filename))
-#             return
-#         else:
-#             self.fileOK = True
-
-#         if os.path.splitext(filename)[1] == ".dcm":
-#             print ("INFO: {0:s} seems to be a dicom file.".format(os.path.basename(filename)))
-#             print ("INFO: Trying to read...", end = "")
-#             if not self.fileOK:
-#                 print ("ERR: Object not initialized (no access to file {0:s}".format(self.filename))
-#                 return
-
-#             self.dcmDat = dicom.read_file(self.filename)
-#             print('Done.')
-
-#             self.xsc = float(self.dcmDat.RTImagePosition[0]) + np.arange(0, self.dcmDat.Rows)*float(self.dcmDat.PixelSpacing[0])
-#             self.ysc = float(self.dcmDat.RTImagePosition[1]) + np.arange(0, self.dcmDat.Columns)*float(self.dcmDat.PixelSpacing[1])
-
-#             data = self.dcmDat.pixel_array
-#             data = data.astype("float")
-
-#             # This is the working setting!!!
-#             #data = np.flipud(np.fliplr(data))
-
-#             #This not necessarily
-#             data = np.fliplr(data)
-
-#             self.data = data
-#             print ("INFO: Importet a matrix of {0:d}x{1:d} from {2:s}".format(self.dcmDat.Rows,self.dcmDat.Columns,  self.filename  ))
-
-# #        self.metaData_fromFilename()
-#         self.dataOK = True
-
-
-#     def set_xrange(self,low, high):
-#         """ Set the area of interest, only rectangular ROIs are supported,
-#             provide low and high x value
-#         """
-
-#         if low > high:  low, high = high, low   # switch variables if provided in the wrong order
-#         self.xrange[0] = low
-#         self.xrange[1] = high
-
-#     def set_yrange(self,low, high):
-#         """ Set the area of interest, only rectangular ROIs are supported,
-#             provide low and high y value
-#         """
-
-#         if low > high:  low, high = high, low   # switch variables if provided in the wrong order
-#         self.yrange[0] = low
-#         self.yrange[1] = high
-
-
-#     def autodetectRectField(self, threshold = 0.9):
-#         print ("INFO: Autodetecting rectangular field. ", end = "")
-
-#         mask = self.data
-#         x = np.zeros(2)
-#         y = np.zeros(2)
-
-#         "Sum along x- and y-axis"
-#         threshold = 0.5
-#         doseOfX = np.sum(mask, axis = 0)
-#         doseOfY = np.sum(mask, axis = 1)
-
-#         x[0] = np.min(np.where(doseOfX >= threshold* np.max(doseOfX)))
-#         x[1] = np.max(np.where(doseOfX >= threshold* np.max(doseOfX)))
-#         y[0] = np.min(np.where(doseOfY >= threshold* np.max(doseOfY)))
-#         y[1] = np.max(np.where(doseOfY >= threshold* np.max(doseOfY)))
-#         y[1] = y[1]
-
-#         print ("Found x = [" +str(x[0])+ "," +str(x[1])+
-#                            "] and y = [" +str(y[0])+ "," +str(y[1])+ "]" )
-#         return x, y
-
-
-#     def crop(self, x, y):
-#         """ Crops the data according to given x and y. If no boundaries are given,
-#         full width/height is assumed to be correct"""
-
-#         data = self.data[int(y[0]) : int(y[1]), int(x[0]) : int(x[1])]
-#         self.data = data
-#         return data
-
-#     def preprocess(self):
-#         print("Enhancing image by normalization, median-blurring and histogram-equalization...")
-#         data = self.data- np.min(self.data)
-#         data = 255.0*data/np.max(data)
-#         median = filters.median_filter(data.astype('uint8'),7)
-#         equ = histogram_equalize(median)
-#         return equ
-
-#     def grey2MU(self, MU):
-#         print("Correcting image for MU")
-#         self.data = self.data/MU
-#         self.MUcorr = True
-
-#     def convert2WEPL(self, p):
-#         if len(p)==3:
-#             self.data = p[0]*np.power(self.data,2) + p[1]*self.data + p[2]
-#         if len(p)==2:
-#             self.data = p[0]*self.data + p[1]
-
-#     def normalize(self):
-#         """ takes data from lynx and normalizes to values between 0 and 255."""
-#         self.data = self.data- np.min(self.data)
-#         self.data = 255.0*self.data/np.max(self.data)
-#         return self.data
-
-#     def invert(self):
-#         """ takes the image data and inverts scale"""
-#         self.data = self.data-np.max(self.data)
-#         self.data = np.multiply(self.data, -1)
-#         return self.data
-
 class RTstruct:
     """Class that holds everything that is necessary
     for the handling of RT structure sets in this application
@@ -334,13 +187,6 @@ class Crosshair:
         self.visible = False
 
 
-
-
-
-
-
-
-
 class OverlayImage(QObject):
     "Class that holds data to allow shifting for positioning"
     #Define Signals
@@ -402,11 +248,11 @@ class OverlayImage(QObject):
 #            self.Treat_shift[abs(self.y_shift):, abs(self.x_shift):] = self.Treat
 #            self.Plan_shift[:self.height, :self.width]   = self.Plan
         # depending on which direction is moved:
-        if self.x_shift >= 0   and self.y_shift >= 0:
-            self.Plan_shift[ :self.height, :self.width] = self.Plan
-            self.Treat_shift[self.y_shift:,self.x_shift:] = self.Treat
+        if self.x_shift >= 0 and self.y_shift >= 0:
+            self.Plan_shift[:self.height, :self.width] = self.Plan
+            self.Treat_shift[self.y_shift:, self.x_shift:] = self.Treat
 
-        elif self.x_shift < 0  and self.y_shift >= 0:
+        elif self.x_shift < 0 and self.y_shift >= 0:
             self.Plan_shift[:self.height, abs(self.x_shift):] = self.Plan
             self.Treat_shift[self.y_shift:, :self.width] = self.Treat
 
@@ -414,9 +260,9 @@ class OverlayImage(QObject):
             self.Plan_shift[abs(self.y_shift):, :self.width] = self.Plan
             self.Treat_shift[:self.height, self.x_shift:] = self.Treat
 
-        elif self.x_shift < 0  and self.y_shift < 0:
+        elif self.x_shift < 0 and self.y_shift < 0:
             self.Plan_shift[abs(self.y_shift):, abs(self.x_shift):] = self.Plan
-            self.Treat_shift[:self.height, :self.width]   = self.Treat
+            self.Treat_shift[:self.height, :self.width] = self.Treat
 
         # get new difference
         self.Difference = self.Plan_shift - self.Treat_shift
@@ -425,14 +271,17 @@ class OverlayImage(QObject):
 
     def get_rgb(self):
         "Returns RGB matrix with shifted colors"
-        RED = self.Plan_shift
-        GREEN = self.Treat_shift
+        P = self.Plan_shift
+        T = self.Treat_shift
+
+        RED = (P - np.min(P))/(np.max(P) - np.min(P))
+        GREEN = (T - np.min(T))/(np.max(T) - np.min(T))
         BLUE = np.zeros(np.shape(RED))
 
         RGB = np.zeros((np.shape(RED)[0], np.shape(RED)[1], 3))
-        RGB[:,:,0] = RED
-        RGB[:,:,1] = GREEN
-        RGB[:,:,2] = BLUE
+        RGB[:, :, 0] = RED
+        RGB[:, :, 1] = GREEN
+        RGB[:, :, 2] = BLUE
 
         return RGB
 
@@ -451,13 +300,15 @@ class OverlayImage(QObject):
     def reset(self):
         "Resets movement from previous commands"
         self.Plan_shift = self.Plan
-        self.Treat_shift= self.Treat
+        self.Treat_shift = self.Treat
 
         self.x_shift = 0
         self.y_shift = 0
 
+
 class GrayWindow(QObject):
     "Class that is used to adjust GrayWindow of Planar Scans"
+
     def __init__(self, SliderCenter, SliderRange,
                  TextCenter, TextRange, canvas, histcanvas, data):
 
@@ -536,8 +387,6 @@ class Check:
         # If any check fails, return False
         if all(checks): return True
         else:           return False
-
-
 
 
     def serialwrite(self, command):
