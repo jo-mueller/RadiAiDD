@@ -36,8 +36,8 @@ if pyqt_version == 4:
     import Landmark as Landmark
 
 elif pyqt_version == 5:
-    import Backend.IsoCenter5 as IsoCenter
-    import Backend.Landmark5 as Landmark
+    import Backend.UI.IsoCenter5 as IsoCenter
+    import Backend.UI.Landmark5 as Landmark
 
 
 ''''''''''''''''''''''''

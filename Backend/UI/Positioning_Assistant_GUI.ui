@@ -39,7 +39,7 @@
     <item row="0" column="0">
      <widget class="QTabWidget" name="TabTop">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="TabRadiography">
        <attribute name="title">
@@ -1471,7 +1471,7 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>970</width>
+                     <width>770</width>
                      <height>545</height>
                     </rect>
                    </property>
@@ -1761,7 +1761,7 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>970</width>
+                     <width>770</width>
                      <height>545</height>
                     </rect>
                    </property>
@@ -1897,7 +1897,7 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>970</width>
+                     <width>770</width>
                      <height>545</height>
                     </rect>
                    </property>
@@ -2428,8 +2428,8 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset>
-                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_top.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_top.png</iconset>
+                        <iconset resource="ressources.qrc">
+                         <normaloff>:/Arrows/Icons/move_top.png</normaloff>:/Arrows/Icons/move_top.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2439,8 +2439,8 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset>
-                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_left.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_left.png</iconset>
+                        <iconset resource="ressources.qrc">
+                         <normaloff>:/Arrows/Icons/move_left.png</normaloff>:/Arrows/Icons/move_left.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2464,8 +2464,8 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset>
-                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_right.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_right.png</iconset>
+                        <iconset resource="ressources.qrc">
+                         <normaloff>:/Arrows/Icons/move_right.png</normaloff>:/Arrows/Icons/move_right.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -2475,8 +2475,8 @@
                         <string/>
                        </property>
                        <property name="icon">
-                        <iconset>
-                         <normaloff>C:/Users/johan/.designer/backup/Icons/move_down.png</normaloff>C:/Users/johan/.designer/backup/Icons/move_down.png</iconset>
+                        <iconset resource="ressources.qrc">
+                         <normaloff>:/Arrows/Icons/move_down.png</normaloff>:/Arrows/Icons/move_down.png</iconset>
                        </property>
                       </widget>
                      </item>
@@ -3667,21 +3667,39 @@
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QLabel" name="Logo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>300</height>
+        </size>
+       </property>
        <property name="text">
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap>C:/Users/johan/.designer/backup/Icons/Pic.jpg</pixmap>
+        <pixmap resource="ressources.qrc">:/Imgs/Icons/Pic.jpg</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
        </property>
       </widget>
       <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>200</width>
-         <height>0</height>
+         <height>300</height>
         </size>
        </property>
        <property name="title">
@@ -3801,6 +3819,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="ressources.qrc"/>
+ </resources>
  <connections/>
 </ui>

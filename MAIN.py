@@ -13,32 +13,18 @@ import numpy as np
 import pydicom as dicom
 from datetime import datetime
 
-try:
-    from PyQt4 import QtGui
-    from PyQt4 import QtCore
-    from PyQt4.QtGui import QMessageBox as QMessage
-    from PyQt4.QtGui import QApplication as Qapp
-    from PyQt4.QtGui import QFileDialog as Qfile
-    from PyQt4.QtGui import QMainWindow as QMain
-    from PyQt4.QtGui import QToolBar
-    from PyQt4.QtGui import QInputDialog
-    from PyQt4.QtCore import QObject
-    pyqt_version = 4
-except Exception:
-    print('PyQt Version: 5')
-    from PyQt5 import QtGui
-    from PyQt5.QtWidgets import QMessageBox as QMessage
-    from PyQt5.QtWidgets import QApplication as Qapp
-    from PyQt5.QtCore import pyqtSignal, pyqtSlot, QThreadPool, QRunnable, QObject, QCoreApplication
-    from PyQt5.QtWidgets import QFileDialog as Qfile
-    from PyQt5.QtWidgets import QMainWindow as QMain
-#    from PyQt5.QtWidgets import QWidget as QWid
-    from PyQt5.QtWidgets import QToolBar
-    from PyQt5.QtWidgets import QInputDialog
 
-    import PyQt5.QtWidgets as QtWidgets
-    import PyQt5.QtCore as QtCore
-    pyqt_version = 5
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QMessageBox as QMessage
+from PyQt5.QtWidgets import QApplication as Qapp
+from PyQt5.QtCore import pyqtSignal, pyqtSlot, QThreadPool,QRunnable, QObject, QCoreApplication
+from PyQt5.QtWidgets import QFileDialog as Qfile
+from PyQt5.QtWidgets import QMainWindow as QMain
+#    from PyQt5.QtWidgets import QWidget as QWid
+from PyQt5.QtWidgets import QToolBar
+
+import PyQt5.QtWidgets as QtWidgets
+pyqt_version = 5
 
 # from Backend.Containers import Lynx
 from Backend.Containers import RTstruct
@@ -49,11 +35,7 @@ from Backend.Containers import Crosshair
 
 from Backend.Children import IsoCenter_Child as IsoCenter
 from Backend.Children import Landmark_Child as Landmark
-
-if pyqt_version == 4:
-    from Backend.Positioning_Assistant_GUI  import Ui_Mouse_Positioning_Interface
-elif pyqt_version == 5:
-    from Backend.Positioning_Assistant_GUI5 import Ui_Mouse_Positioning_Interface
+from Backend.UI.Positioning_Assistant_GUI5 import Ui_Mouse_Positioning_Interface
 
 
 class Radiography(object):
@@ -1486,7 +1468,7 @@ class XRay(object):
             if not Checklist.IsoCenter:
                 logging.debug('Warning: Isocenter hasn\'t been defined yet')
             if not Checklist.LandmarkRG:
-                logging.debug('Warning: Radiography Landmark hasn\'t been defined yet')
+                logging.debug('Warning: Radiography Landmark not defined yet')
             if not Checklist.LandmarkXR and Checklist.Target:
                 logging.debug('Warning: Plan has not been loaded yet')
 
@@ -1501,8 +1483,12 @@ class XRay(object):
             x_target = x_Pin + dx/k
             y_target = y_Pin + dy/k
 
-            self.Crosshair_Target.setup(canvas, 5, x_target, y_target, text = 'Target', zorder = 2, color = 'purple')
-            self.Crosshair_Repo.setup(  canvas, 3, x_target, y_target, text = '', zorder = 2, color = 'purple')
+            self.Crosshair_Target.setup(canvas, 5, x_target, y_target,
+                                        text='Target', zorder=2,
+                                        color='purple')
+            self.Crosshair_Repo.setup(canvas, 3, x_target, y_target,
+                                      text='', zorder=2,
+                                      color='purple')
             self.Crosshair_Target.toggle()
             self.Crosshair_Repo.toggle()
         else:
@@ -1533,13 +1519,12 @@ class XRay(object):
 
         # Get handles to both images and adjust alpha
         images = GUI.Display_Overlay.canvas.axes.get_images()
-        Plan  = images[0]
+        Plan = images[0]
         Treat = images[1]
         Plan.set_alpha(alpha)
         Treat.set_alpha(1.0-alpha)
 
         GUI.Display_Overlay.canvas.draw()
-
 
     def update_overlay(self, Overlay_container, canvas_overlay,
                        canvas_FC, canvas_diff, first=False):
@@ -1571,7 +1556,7 @@ class XRay(object):
             # difference image
             canvas_diff.axes.imshow(Overlay_container.get_diff(), cmap='gray',
                                     origin='lower')
-            
+
             canvas_diff.draw()
             return 0
 
@@ -1848,7 +1833,7 @@ if __name__=="__main__":
     # Create App-ID: Otherwise, the software's icon will not display propperly.
     appid = 'OncoRay.Preclinical.RadiAide' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
-    app.setWindowIcon(QtGui.QIcon('Backend/Icons/Icon_3.png'))
+    app.setWindowIcon(QtGui.QIcon('Backend/UI/Icons/Icon_3.png'))
 
     # Create GUI + Logo and Style
     GUI = MainWindow()
@@ -1856,8 +1841,9 @@ if __name__=="__main__":
     GUI.show()
 
     # Make Logo
-    image = QtGui.QImage(os.path.join(root, "Backend", "Icons", "Pic.jpg"))
-    GUI.Logo.setPixmap(QtGui.QPixmap.fromImage(image))
+    # image = QtGui.QImage(os.path.join(root, "Backend", "UI",
+    #                                   "Icons", "Pic.jpg"))
+    # GUI.Logo.setPixmap(QtGui.QPixmap.fromImage(image))
 
 
     #initialize Radiography- and XRay-related functions

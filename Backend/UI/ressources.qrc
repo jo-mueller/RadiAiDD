@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="Arrows">
+    <file>Icons/move_left.png</file>
+    <file>Icons/move_down.png</file>
+    <file>Icons/move_top.png</file>
+    <file>Icons/move_right.png</file>
+  </qresource>
+  <qresource prefix="Imgs">
+    <file>Icons/Pic.jpg</file>
+  </qresource>
+</RCC>
