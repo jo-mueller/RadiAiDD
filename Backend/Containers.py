@@ -93,7 +93,7 @@ class Point:
 class Crosshair:
     """Class that corms a crosshair of given color
     and size on a given canvas"""
-    
+
     def __init__(self):
         self.canvas = []
         self.size = []
@@ -175,14 +175,14 @@ class Crosshair:
 
     def wipe(self):
         " Removes crosshair from wherever"
-        if self.visible: 
+        if self.visible:
             self.toggle()
 
         self.x = []
         self.y = []
         self.horizontalLine = []
         self.verticalLine   = []
-        if self.circle: 
+        if self.circle:
             self.circularLine = []
         self.visible = False
 
@@ -207,7 +207,8 @@ class OverlayImage(QObject):
         self.Plan_shift = self.Plan
         self.Treat_shift = self.Treat
 
-        self.Difference = np.subtract( self.Plan, self.Treat)
+        self.Difference = np.subtract( self.Plan.astype(float),
+                                      self.Treat.astype(float))
 
         self.width = np.shape(self.Plan)[1]
         self.height = np.shape(self.Plan)[0]
@@ -264,13 +265,18 @@ class OverlayImage(QObject):
             self.Plan_shift[abs(self.y_shift):, abs(self.x_shift):] = self.Plan
             self.Treat_shift[:self.height, :self.width] = self.Treat
 
-        # get new difference
-        self.Difference = self.Plan_shift - self.Treat_shift
+        # get new difference as floating point numbers
+        self.Difference = np.subtract(self.Plan_shift.astype(float),
+                                      self.Treat_shift.astype(float))
 
         return self.x_shift, self.y_shift
 
-    def get_rgb(self):
-        "Returns RGB matrix with shifted colors"
+    def get_rgb(self, saturated=0.3):
+        """
+        Returns RGB matrix with shifted colors
+
+        saturated: percentage of pixels that should be saturated (=1)
+        """
         P = self.Plan_shift
         T = self.Treat_shift
 
@@ -314,12 +320,13 @@ class GrayWindow(QObject):
 
         QObject.__init__(self)
         self.SliderCenter = SliderCenter
-        self.SliderRange  = SliderRange
+        self.SliderRange = SliderRange
 
-        self.TextCenter   = TextCenter
-        self.TextRange    = TextRange
-        self.canvas       = canvas
-        self.histcanvas   = histcanvas
+        self.TextCenter = TextCenter
+        self.TextRange = TextRange
+        self.canvas = canvas
+        self.histcanvas = histcanvas
+
         self.cmin = np.min(data)
         self.cmax = np.max(data)
 
@@ -330,13 +337,14 @@ class GrayWindow(QObject):
         self.SliderRange.setMinimum(0)
         self.SliderRange.setMaximum(center*2)
 
-        self.SliderCenter.valueChanged.connect(self.update)
-        self.SliderRange.valueChanged.connect(self.update)
-
         self.SliderCenter.setValue(350)
         self.SliderRange.setValue(200)
         self.TextCenter.setText(str(int(350)))
         self.TextRange.setText(str(int(200)))
+
+        self.SliderCenter.valueChanged.connect(self.update)
+        self.SliderRange.valueChanged.connect(self.update)
+
         self.update()
 
     def update(self):

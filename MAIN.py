@@ -1161,6 +1161,10 @@ class XRay(object):
         from the different modalities. If the user accidently loaded the wrong
         CT image data/structure set/planar image, this check will
         notice
+        
+        Output:
+            True for consistent UIDs
+            False for inconsistent UIDs
         """
         UIDs = [self.UID_CT, self.UID_RTstruct, self.UID_plan, self.UID_treat]
         UIDs = [x for x in UIDs if x != ""]  # remove None-UIds
@@ -1185,6 +1189,32 @@ class XRay(object):
                 return True
         else:
             return True
+
+    def processPlanarXRay(self, meta, saturated=0.35, rotate=90):
+        """
+        Processes a planar X-ray image for display with enhanced contrast
+
+        ---Input---
+        Image: dicom metadata object
+        saturated: percentage of pixels that should be saturated. Default
+        value is 0.35 %
+        rotate: Angle by which the image should be rotate. Has to be
+        multiple of 90 degrees
+
+        ---Returns---
+        n x m array
+        """
+
+        # Rotate
+        array = meta.pixel_array
+        for i in range(int(rotate/90.0)):
+            array = np.rot90(array)
+
+        t = np.sort(array.flatten())
+        clip = t[int(len(t)*(1.0 - saturated/100.0))]
+        array[array > clip] = clip
+
+        return array
 
     def loadPlanarXRay_Plan(self):
         """Function to be invoked for zupload of planar XRay image from Plan"""
@@ -1222,8 +1252,8 @@ class XRay(object):
             else:
                 return 0
 
-            self.Planar_Scans.Plan = np.rot90(meta.pixel_array)
-
+            # preprocessing and displaying planar X-Ray:
+            self.Planar_Scans.Plan = self.processPlanarXRay(meta)
             GUI.Display_Plan.canvas.axes.imshow(self.Planar_Scans.Plan,
                                                 cmap='gray', origin='lower')
             GUI.Display_Plan.canvas.draw()
@@ -1283,7 +1313,8 @@ class XRay(object):
                 return 0
 
             # load planar image
-            self.Planar_Scans.Treat = np.rot90(meta.pixel_array)
+            self.Planar_Scans.Treat = self.processPlanarXRay(meta)
+            # self.Planar_Scans.Treat = np.rot90(meta.pixel_array)
 
             GUI.Display_Treatment.canvas.axes.imshow(self.Planar_Scans.Treat,
                                                      cmap='gray',
@@ -1358,7 +1389,7 @@ class XRay(object):
                                             GUI.Display_FalseColor.canvas,
                                             GUI.Display_Difference.canvas))
 
-            # Assign GrayWindow Handler to Overlay and Difference image
+            # Assign GrayWindow Handler to Overlay image
             self.OverlayGrayWindow = GrayWindow(GUI.Slider_Overlay_GV_center,
                                                 GUI.Slider_Overlay_GV_range,
                                                 GUI.Txt_Overlay_GV_center,
@@ -1367,6 +1398,7 @@ class XRay(object):
                                                 GUI.Display_Overlay_Hist.canvas,
                                                 self.Planar_Scans.Plan)
 
+            # Assign GrayWindow Handler to Difference Image
             self.DifferenceGrayWindow = GrayWindow(GUI.Slider_Difference_GV_center,
                                                    GUI.Slider_Difference_GV_range,
                                                    GUI.Txt_Overlay_GV_center,
@@ -1478,7 +1510,9 @@ class XRay(object):
             self.Crosshair_Repo.toggle()
 
     def accept_repo(self):
-        """ Invoked function when X-Ray based Repositioning is accepted"""
+        """
+        function that's called when X-Ray based Repositioning is accepted
+        """
         try:
             Checklist.Repositioning = True
             Radiography.CalcDist()
@@ -1490,7 +1524,9 @@ class XRay(object):
             logging.error(traceback.print_exc())
 
     def adjust_alpha(self):
-        """Function that is invoked if alpha slider for Overlay is moved"""
+        """
+        Function that is invoked if alpha slider for Overlay is moved
+        """
 
         # get alpha value from Slider
         alpha = float(GUI.Slider_Planar_Overlay.value()/100.0)
@@ -1529,12 +1565,13 @@ class XRay(object):
             # False-color image
             FC = canvas_FC.axes.imshow(Overlay_container.get_rgb(),
                                        origin='lower')
+            FC.set_clim(0.2, 1.0)
             canvas_FC.draw()
 
             # difference image
             canvas_diff.axes.imshow(Overlay_container.get_diff(), cmap='gray',
                                     origin='lower')
-            FC.set_clim(0, 0.5)
+            
             canvas_diff.draw()
             return 0
 
@@ -1554,12 +1591,12 @@ class XRay(object):
             # Set up new Overlay and set clim
             canvas_overlay.axes.imshow(Overlay_container.get_plan(),
                                                 interpolation='nearest',
-                                                cmap = 'gray', alpha = 0.5,
-                                                origin = 'lower')
+                                                cmap='gray', alpha=0.5,
+                                                origin='lower')
             canvas_overlay.axes.imshow(Overlay_container.get_treat(),
                                                 interpolation='nearest',
-                                                cmap = 'gray', alpha = 0.5,
-                                                origin = 'lower')
+                                                cmap='gray', alpha=0.5,
+                                                origin='lower')
             canvas_overlay.axes.set_xlim(xlims)
             canvas_overlay.axes.set_ylim(ylims)
             canvas_overlay.axes.set_alpha(alpha)
@@ -1594,7 +1631,7 @@ class XRay(object):
 
             canvas_diff.axes.clear()
 
-            #Print Difference Image and set clim
+            # Print Difference Image and set clim
             canvas_diff.axes.imshow(Overlay_container.get_diff(), cmap = 'gray',
                                     origin = 'lower')
             canvas_diff.axes.set_xlim(xlims)
