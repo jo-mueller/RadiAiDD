@@ -1,25 +1,25 @@
  #! /usr/bin/python
 # -*- coding: utf-8 -*-
-""" Program to read DICOM data from the IBA Lynx device and support the
 
-    setup of the double scattering system"""
+""" 
+This script contains all kinds of object definitions that are required
+for RadiAIDD 
+Program to read DICOM data from the IBA Lynx device and support the
+
+    setup of the double scattering system
+"""
 
 
 try:
     from PyQt4.QtCore import QObject
     pyqt_version = 4
-except:
+except Exception:
     from PyQt5.QtCore import QObject
     pyqt_version = 5
 
-
-import os
 import numpy as np
 import pydicom as dicom
-import scipy.ndimage.filters as filters
 import traceback
-import tifffile
-import logging
 
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
@@ -33,13 +33,14 @@ class RadiographyImage(object):
 
     def __init__(self, filename, array, pw):
         self.filename = filename
-        self.array = array
+        self.array = np.flipud(array)
         self.pw = pw
 
 class RTstruct:
     """Class that holds everything that is necessary
     for the handling of RT structure sets in this application
     """
+
     def __init__(self):
         self.filename = []
         self.PatientID = []
@@ -49,15 +50,15 @@ class RTstruct:
         metadata = dicom.read_file(fullpath)
 
         self.filename = fullpath
-        self.PatientID      = metadata.PatientID
+        self.PatientID = metadata.PatientID
 
         # Iteratively load all Points in metadata into dictionary
         Points = {}
-        i=0
+        i = 0
         while i < len(metadata.ROIContourSequence):
             name = Point(metadata, i).Name
             Points[name] = Point(metadata, i)
-            i+=1
+            i += 1
 
         self.Earpin = Points.get('Earpin')
         self.Target = Points.get('Target')
@@ -167,10 +168,14 @@ class Crosshair:
         for canvas in self.canvases:
 
             if self.visible:
-                self.horizontalLine.set_data([self.x-self.size, self.x +self.size], [self.y, self.y])
-                self.verticalLine.set_data(  [self.x, self.x], [self.y -self.size, self.y+self.size])
+                self.horizontalLine.set_data([self.x-self.size,
+                                              self.x +self.size],
+                                             [self.y, self.y])
+                self.verticalLine.set_data([self.x, self.x],
+                                           [self.y -self.size,
+                                            self.y+self.size])
                 if self.circle:
-                    self.circularLine.center = (x,y)
+                    self.circularLine.center = (x, y)
                     canvas.axes.add_patch(self.circularLine)
 
     def wipe(self):
@@ -181,7 +186,7 @@ class Crosshair:
         self.x = []
         self.y = []
         self.horizontalLine = []
-        self.verticalLine   = []
+        self.verticalLine = []
         if self.circle:
             self.circularLine = []
         self.visible = False
@@ -189,7 +194,7 @@ class Crosshair:
 
 class OverlayImage(QObject):
     "Class that holds data to allow shifting for positioning"
-    #Define Signals
+    # Define Signals
 #    moved = Signal(int, int)
 
     def __init__(self):
@@ -197,17 +202,15 @@ class OverlayImage(QObject):
 
         # Allocate variables so they can be written before init method
         self.Plan = np.array(None)
-        self.Treat= np.array(None)
-
+        self.Treat = np.array(None)
         self.Spacing = np.array([None, None])
-
 
     def init(self):
         "Initializes all necessary variables for further calculations"
         self.Plan_shift = self.Plan
         self.Treat_shift = self.Treat
 
-        self.Difference = np.subtract( self.Plan.astype(float),
+        self.Difference = np.subtract(self.Plan.astype(float),
                                       self.Treat.astype(float))
 
         self.width = np.shape(self.Plan)[1]
@@ -215,6 +218,7 @@ class OverlayImage(QObject):
 
         self.x_shift = 0
         self.y_shift = 0
+
     def move(self, direction):
         "function that returns new imagedata with moved coords"
 
@@ -225,12 +229,12 @@ class OverlayImage(QObject):
         self.y_shift += y
 
 
-        #Calculate size of new matrix
+        # Calculate size of new matrix
         new_x = self.width + abs(self.x_shift)
         new_y = self.height + abs(self.y_shift)
-        #...and allocate this matrix
-        self.Plan_shift   = np.zeros((new_y, new_x))
-        self.Treat_shift  = np.zeros((new_y, new_x))
+        # ...and allocate this matrix
+        self.Plan_shift = np.zeros((new_y, new_x))
+        self.Treat_shift = np.zeros((new_y, new_x))
 
         # depending on which direction is moved:
 #        if self.x_shift >= 0   and self.y_shift >= 0:
@@ -376,7 +380,8 @@ class Check:
 
     def ready(self):
         "Checks all flags and returns true if all flags are up"
-        checks = [self.IsoCenter, self.Target, self.LandmarkRG, self.LandmarkXR,
+        checks = [self.IsoCenter, self.Target,
+                  self.LandmarkRG, self.LandmarkXR,
                   self.Planar_scan_Plan, self.Planar_scan_Treat,
                   self.Repositioning]
 
@@ -393,9 +398,10 @@ class Check:
 #        else: print('X-Ray Landmarks: Set.')
 
         # If any check fails, return False
-        if all(checks): return True
-        else:           return False
-
+        if all(checks):
+            return True
+        else:
+            return False
 
     def serialwrite(self, command):
         """Function that sends any given command to specified serial port.
@@ -415,6 +421,3 @@ class Check:
         asw = (self.SerialCon.read(1024)).decode()
 
         return asw
-
-
-

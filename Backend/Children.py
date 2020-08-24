@@ -161,16 +161,15 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
                                               pw)
 
             self.Text_Filename.setText(fname)  # display filename
+            self.canvas.axes.imshow(self.Image.array, cmap='gray',
+                                    zorder=1, origin='lower')
+            self.canvas.draw()
+            logging.info('{:s} imported as Isocenter'.format(fname))
 
-        except:
+        except Exception:
             logging.ERROR("{:s} could not be opened".format(fname))
             self.IsoCenter_flag = False
             return 0
-
-        self.canvas.axes.imshow(self.Image.array, cmap='gray',
-                                zorder=1, origin='lower')
-        self.canvas.draw()
-        logging.info('{:s} imported as Isocenter Radiography'.format(fname))
 
     def LockIsoCenter(self):
         """ Read current values from sliders/ spot location text fields

@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+
+from Backend.Containers import RTstruct
+from Backend.Containers import OverlayImage
+from Backend.Containers import Check
+from Backend.Containers import GrayWindow
+from Backend.Containers import Crosshair
+
+from Backend.Children import IsoCenter_Child as IsoCenter
+from Backend.Children import Landmark_Child as Landmark
+from Backend.UI.Positioning_Assistant_GUI5 import Ui_Mouse_Positioning_Interface
+from Backend.Registration import Registration
+
 import traceback
 import ctypes
 import glob
@@ -17,7 +29,12 @@ from datetime import datetime
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QMessageBox as QMessage
 from PyQt5.QtWidgets import QApplication as Qapp
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, QThreadPool,QRunnable, QObject, QCoreApplication
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import QThreadPool
+from PyQt5.QtCore import QRunnable
+from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QFileDialog as Qfile
 from PyQt5.QtWidgets import QMainWindow as QMain
 #    from PyQt5.QtWidgets import QWidget as QWid
@@ -26,29 +43,22 @@ from PyQt5.QtWidgets import QToolBar
 import PyQt5.QtWidgets as QtWidgets
 pyqt_version = 5
 
-# from Backend.Containers import Lynx
-from Backend.Containers import RTstruct
-from Backend.Containers import OverlayImage
-from Backend.Containers import Check
-from Backend.Containers import GrayWindow
-from Backend.Containers import Crosshair
-
-from Backend.Children import IsoCenter_Child as IsoCenter
-from Backend.Children import Landmark_Child as Landmark
-from Backend.UI.Positioning_Assistant_GUI5 import Ui_Mouse_Positioning_Interface
-
 
 class Radiography(object):
     def __init__(self):
 
         try:
-            # Patient Positioning holds information about positioning of patient in CT
+            # Patient Positioning holds information about positioning
+            # of patient in CT
             self.PatientPosition = []
 
             # Crosshairs (two because two radiography images)
             self.Crosshair_Landmark = [Crosshair(), Crosshair()]
-            self.Crosshair_IsoCenter = [Crosshair(), Crosshair()]
             self.Crosshair_Target = [Crosshair(), Crosshair()]
+
+            # Three isocenter crosshairs for active positioning
+            self.Crosshair_IsoCenter = [Crosshair(), Crosshair(),
+                                        Crosshair(), Crosshair()]
 
             # Flags for visibility SpotTxt_x
             self.crosshair = False
@@ -285,17 +295,15 @@ class Radiography(object):
         GUI.Text_RG_Filename_IsoCenter.setText(self.IsoCenterImg.filename)
 
         canvases = [GUI.Display_Radiography.canvas,
-                    GUI.Display_Isocenter.canvas]
+                    GUI.Display_Isocenter.canvas,
+                    GUI.Display_Fixed.canvas,
+                    GUI.Display_Fusion.canvas]
 
         # Prepare crosshairs
         for crosshair in tuple(zip(self.Crosshair_IsoCenter, canvases)):
             crosshair[0].setup(crosshair[1], size=5, x=x_iso, y=y_iso,
                                text='IsoCenter', zorder=3,
                                color='blue', circle=True)
-        # self.Crosshair_IsoCenter.setup(GUI.Display_Isocenter.canvas,
-        #                                size = 5, x = x , y = y, text = 'IsoCenter')
-        # self.Crosshair_Landmark.setup( , size = 5, x = x ,y = y,
-        #                               text = 'Earpin', zorder = 3, color = 'red', circle = True)
 
     def toggleLM(self):
         for crosshair in self.Crosshair_Landmark:
@@ -309,11 +317,10 @@ class Radiography(object):
 class Signals(QObject):
 
     # emit position as float
-    travelling  = pyqtSignal(np.ndarray)
-    arrived     = pyqtSignal()
-    calibrated  = pyqtSignal(bool)
-    State       = pyqtSignal(np.ndarray)
-
+    travelling = pyqtSignal(np.ndarray)
+    arrived = pyqtSignal()
+    calibrated = pyqtSignal(bool)
+    State = pyqtSignal(np.ndarray)
 
 
 class StatusWatchdog(QRunnable):
@@ -335,7 +342,7 @@ class StatusWatchdog(QRunnable):
         self.SID = Motor.SlaveID
 
         # create Message to be emitted
-        self.StatusAll = np.ndarray(3, dtype = bool)
+        self.StatusAll = np.ndarray(3, dtype=bool)
         self.StatusAll[:] = False
         self.Signal = Signals()
 
@@ -347,7 +354,7 @@ class StatusWatchdog(QRunnable):
         logging.info('Table Status WatchDog awake')
         # am I running?
         if not self._isRunning:
-            self._isRunning  = True
+            self._isRunning = True
 
         # actual routine
         while self._isRunning:
@@ -402,8 +409,6 @@ class StatusWatchdog(QRunnable):
         self._pause = False
 
 
-
-
 class MovementSupervisor(QRunnable):
     """This thread allows to supervise motor movement without halting the GUI
         while doing this. Needs:
@@ -422,16 +427,17 @@ class MovementSupervisor(QRunnable):
 
         self.Signal = Signals()
 
-
     @pyqtSlot()
-    def run(self, mode = 'normal'):
-        """Routine that is executed while the thread is running
-            - mode: if mode is not normal, then it's probably a reference run"""
+    def run(self, mode='normal'):
+        """
+        Routine that is executed while the thread is running
+        - mode: if mode is not normal, then it's probably a reference run
+        """
 
         logging.debug('Table is moving: Movement WatchDog awake')
         # is the thread currently running? Not sure if this is necessary
         if not self._isRunning:
-            self._isRunning  = True
+            self._isRunning = True
 
         # actual routine
         while self._isRunning:
@@ -440,18 +446,18 @@ class MovementSupervisor(QRunnable):
             self.pos = self.Motor.get_Position()
             self.Signal.travelling.emit(self.pos)
 
-            #get state of motor
+            # get state of motor
             self.MState = Motor.serial_query(self.MID, 1, 'ASTATE')[0]
             self.SState = Motor.serial_query(self.SID, 1, 'ASTATE')[0]
 
             # If Motor has arrived, emit stop sign
             if self.MState == 'R' and self.SState == 'R':
-                time.sleep(.5) # wait one second for fine positioning
+                time.sleep(.5)  # wait one second for fine positioning
                 self.pos = Motor.get_Position()
 
                 # Emit signals
                 self.Signal.travelling.emit(self.pos)
-                time.sleep(.5) # wait another second until WatchDog is let off the leash
+                time.sleep(.5)  # wait +1 second until WatchDog is let off the leash
                 self.Signal.arrived.emit()
                 logging.debug('Destination reached: Movement WatchDog asleep')
                 self._isRunning = False
@@ -469,12 +475,12 @@ class MotorControl(object):
     def __init__(self):
 
         # Variables
-        self.pos = [] # Unit: mm
+        self.pos = []  # Unit: mm
         self.Step2MM = 10000.0
 
         # IDs of PS10 elements in bus
         self.MasterID = None
-        self.SlaveID  = None
+        self.SlaveID = None
 
         self.ctrl = serial.Serial()
 
@@ -510,7 +516,7 @@ class MotorControl(object):
         self.threadpool = QThreadPool()
         self.WatchState()
 
-        #Log
+        # Log
         logging.debug('Motor functionality set up successfully')
 
     def ScanCOMPorts(self):
@@ -521,32 +527,37 @@ class MotorControl(object):
             GUI.QComboBox_ListOfPorts.addItem(port)
 
         if len(portlist) == 0:
-            logging.info(('No open ports found. Axes may be disconnected or '+
+            logging.info(('No open ports found. Axes may be disconnected or ' +
                           'used by another software (e.g. OWISOFT)'))
 
     def moveTable(self):
-        """Basic executer function to move table by/to selected value
-            """
+        """
+        Basic executer function to move table by/to selected value
+        """
+
+        # Nothing happens if motor isn't ready.
+        if not self.MOTORstate:
+            return 0
 
         try:
             val = np.array((GUI.SpinBoxTablex.value(),
                             GUI.SpinBoxTabley.value()))
 
-           # get current position
+            # get current position
             curpos = self.get_Position()
 
             # calculate destination depending on positioning mode
             mode = GUI.CBoxABSREL.currentText()
 
-            if mode =='absolute':
+            if mode == 'absolute':
                 dest = val
             elif mode == 'relative':
                 dest = curpos + val
 
             # convert to motor steps
-            val =  self.Step2MM * val #convert to motor steps
+            val = self.Step2MM * val  # convert to motor steps
 
-            # implement maximum/minimum value check here!
+            # maximum/minimum value check
             if not 0 <= dest[0] <= 80.0*self.Step2MM and 0<= dest[1] <=80.0*self.Step2MM:
                 # Ask User if calibration is desired
                 Hint = QMessage()
@@ -556,14 +567,19 @@ class MotorControl(object):
                 Hint.exec_()
                 return -1
 
-#            # write to Axis
-            self.serial_write(self.MasterID, 1, 'PSET', val[1]) #Watch out here: Depends on cable connections!!!!
-            self.serial_write(self.SlaveID,  1, 'PSET', val[0]) #Watch out here: Depends on cable connections!!!!
+            # write to Axis
+            self.serial_write(self.MasterID, 1, 'PSET', val[1])  # Watch out here: Depends on cable connections!!!!
+            self.serial_write(self.SlaveID,  1, 'PSET', val[0])  # Watch out here: Depends on cable connections!!!!
             self.serial_write(self.MasterID, 1, 'PGO')
             self.serial_write(self.SlaveID,  1, 'PGO')
 
             # check this again - are these values correct or LR-inverted?
-            logging.info('Moving table to coordinates: x = {:.2f} y = {:.2f}'.format(val[1], val[0]))
+            if mode == "absolute":
+                logging.info('Moving table to coordinates: x = {:.2f} '
+                             'y = {:.2f}'.format(val[1], val[0]))
+            else:
+                logging.info('Moving table by: dx = {:.2f} '
+                             'dy = {:.2f}'.format(val[1], val[0]))
 
             self.WatchMovement()
 
@@ -579,8 +595,7 @@ class MotorControl(object):
         y = float(self.serial_query(self.MasterID, 1, 'CNT'))/self.Step2MM
         x = float(self.serial_query(self.SlaveID,  1, 'CNT'))/self.Step2MM
 
-        return np.array((x,y))
-
+        return np.array((x, y))
 
     def CopyCoordinates(self):
         "Copies calculated irradiation coordinates to respective field"
@@ -591,15 +606,15 @@ class MotorControl(object):
         GUI.SpinBoxTabley.setValue(y)
 
         # Log
-        logging.info('Coppied destination coordinates x = {:.2f}, y = {:.f}'.format(x, y))
-
+        logging.info('Coppied destination coordinates x = {:.2f}, y = {:.2f}'
+                     .format(x, y))
 
     def setPositioningMode(self):
         """When Mode in absolute/relative combo box changes, write to motor"""
 
         # get text from Combo Box
         mode = GUI.CBoxABSREL.currentText()
-        if self.MOTORstate.state == False:
+        if self.MOTORstate.state is False:
             logging.info('No Motor connected. '
                          'Mode will be applied to next connected device.')
 
@@ -609,9 +624,8 @@ class MotorControl(object):
             logging.info('Positioning mode: absolute')
         elif mode == 'relative':
             self.serial_write(self.MasterID, 1, 'RELAT')
-            self.serial_write(self.SlaveID , 1, 'RELAT')
+            self.serial_write(self.SlaveID, 1, 'RELAT')
             logging.info('Positioning mode: relative')
-
 
     # Thread Control for Movement Control
     def WatchMovement(self):
@@ -621,11 +635,11 @@ class MotorControl(object):
         self.MotorWatch.Signal.travelling.connect(self.update_position)
         self.MotorWatch.Signal.travelling.connect(self.StatusWatchDog.Pause)
         self.MotorWatch.Signal.arrived.connect(self.StatusWatchDog.Continue)
-        GUI.Button_StopTable.clicked.connect(lambda: self.StopMovement(self.MotorWatch))
+        GUI.Button_StopTable.clicked.connect(
+            lambda: self.StopMovement(self.MotorWatch))
         self.StatusWatchDog.Pause()
 
         self.threadpool.start(self.MotorWatch)
-
 
     def StopMovement(self, Instance):
         "Function to stop ax from moving and will stop WatchDog"
@@ -670,11 +684,12 @@ class MotorControl(object):
         GUI.TablePosX.setText(str(pos[0]))
         GUI.TablePosY.setText(str(pos[1]))
 
-
     # Initialization
     def InitMotor(self):
-        """function that executes everything that is necessary to initialize
-            the motor """
+        """
+        function that executes everything that is necessary to initialize
+        the motor
+        """
 
         # Before first: Pause Status WatchDog
         self.StatusWatchDog.Pause()
@@ -685,7 +700,8 @@ class MotorControl(object):
 
         # disable boxes for port selection and connect button
         if self.COMstate.state:
-            logging.info('Port {:s} ready for serial communication.'.format(port))
+            logging.info('Port {:s} ready for serial communication.'
+                         .format(port))
             GUI.QComboBox_ListOfPorts.setEnabled(False)
             GUI.Button_MotorInit.setEnabled(False)
         else:
@@ -703,13 +719,13 @@ class MotorControl(object):
         self.serial_write(self.MasterID, 1, 'INIT')
         self.serial_write(self.SlaveID,  1, 'INIT')
         State_Master = self.serial_query(self.MasterID, 1, 'ASTAT')
-        State_Slave  = self.serial_query(self.SlaveID,  1, 'ASTAT')
+        State_Slave = self.serial_query(self.SlaveID,  1, 'ASTAT')
         logging.debug('Motor init terminated with state {:s} @ Master/{:s} @Slave'.format(State_Master, State_Slave))
 
         # Status checken und calib starten.
         if State_Master.startswith('R') and State_Slave.startswith('R'):
             logging.info('INFO: Motor successfully initialized.')
-            self.setPositioningMode() #read current setting and write to motor
+            self.setPositioningMode()  # read current setting, write to motor
             self.MOTORstate.flag_up()
 
             # When Motor ready: calibrate
@@ -720,47 +736,44 @@ class MotorControl(object):
             logging.error('Motor could not be initialized')
 
     def Calibrate_Motor(self):
-            """execute reference run of object table"""
-#
-            # Ask User if calibration is desired
-            Hint = QMessage()
-            Hint.setIcon(QMessage.Information)
-            Hint.setStandardButtons(QMessage.Ok)
-            Hint.setText("Kalibrierung wird jetzt durchgeführt!")
-            proceed = Hint.exec_()
+        """execute reference run of object table"""
 
+        # Ask User if calibration is desired
+        Hint = QMessage()
+        Hint.setIcon(QMessage.Information)
+        Hint.setStandardButtons(QMessage.Ok)
+        Hint.setText("Kalibrierung wird jetzt durchgeführt!")
+        proceed = Hint.exec_()
 
-            # Execute Calib
-            if proceed == QMessage.Ok:
-                self.serial_write(self.MasterID,1,'REF', 4)
-                self.serial_write(self.SlaveID,1,'REF', 4)
-                self.WatchMovement() #start the thread specifically for reference run
-            logging.info('Table calibration running.')
+        # Execute Calib
+        if proceed == QMessage.Ok:
+            self.serial_write(self.MasterID, 1, 'REF', 4)
+            self.serial_write(self.SlaveID, 1, 'REF', 4)
+            self.WatchMovement()  # start the thread for reference run
+        logging.info('Table calibration running.')
 
     def on_calib(self, flag):
         "gets called when reference motion is finished"
-        if flag == True:
+        if flag is True:
             GUI.BoxTableLimits.setStyleSheet("background-color: green;")
             GUI.LabelREF.setText('Calibrated')
 
-
-
-
-
     # basic communication stuff
-    def serial_write(self, slaveID, nAxis, command, value = ''):
+    def serial_write(self, slaveID, nAxis, command, value=''):
         """ will format and send the given command through the COM port.
             -- command: serial command to be sent.
         """
 
         # write request to COM
         if value == '':
-            command =  ("{:02d}{:s}{:d}\r\n".format(slaveID, command, nAxis))
+            command = ("{:02d}{:s}{:d}\r\n".format(slaveID, command, nAxis))
         else:
-            command =  ("{:02d}{:s}{:d}={:s}\r\n".format(slaveID, command, nAxis, str(value)))
+            command = ("{:02d}{:s}{:d}={:s}\r\n"
+                       .format(slaveID, command, nAxis, str(value)))
 
         command = command.encode(encoding="ASCII")
-        if self.verbose: logging.debug(command)
+        if self.verbose:
+            logging.debug(command)
         self.ctrl.write(command)
 
         # Read answer from COM and print full command  + reply
@@ -1143,7 +1156,7 @@ class XRay(object):
         from the different modalities. If the user accidently loaded the wrong
         CT image data/structure set/planar image, this check will
         notice
-        
+
         Output:
             True for consistent UIDs
             False for inconsistent UIDs
@@ -1815,12 +1828,13 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
 
         app.quit()
 
+
 if __name__=="__main__":
 
     root = os.getcwd()
-    stylefile = os.path.join(root, 'Backend','Style', 'stylefile.qss')
+    stylefile = os.path.join(root, 'Backend', 'Style', 'stylefile.qss')
 
-    #Assign Checklist
+    # Assign Checklist
     Checklist = Check()
 
     # check if instance of app is known to OS
@@ -1831,7 +1845,7 @@ if __name__=="__main__":
         pass
 
     # Create App-ID: Otherwise, the software's icon will not display propperly.
-    appid = 'OncoRay.Preclinical.RadiAide' # arbitrary string
+    appid = 'OncoRay.Preclinical.RadiAiDD'  # for TaskManager
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
     app.setWindowIcon(QtGui.QIcon('Backend/UI/Icons/Icon_3.png'))
 
@@ -1840,22 +1854,10 @@ if __name__=="__main__":
     GUI.setStyleSheet(open(stylefile, "r").read())
     GUI.show()
 
-    # Make Logo
-    # image = QtGui.QImage(os.path.join(root, "Backend", "UI",
-    #                                   "Icons", "Pic.jpg"))
-    # GUI.Logo.setPixmap(QtGui.QPixmap.fromImage(image))
-
-
-    #initialize Radiography- and XRay-related functions
-    Logger      = Log()
+    # initialize Radiography- and XRay-related functions
+    Logger = Log()
     Radiography = Radiography()
-    XRay        = XRay()
-    Motor       = MotorControl()
+    XRay = XRay()
+    Motor = MotorControl()
+    Reg = Registration(GUI)
     app.exec_()
-
-
-
-
-
-
-

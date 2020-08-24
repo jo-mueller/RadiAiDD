@@ -35,11 +35,17 @@
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_11">
+   <layout class="QGridLayout" name="gridLayout_50">
     <item row="0" column="0">
-     <widget class="QTabWidget" name="TabTop">
+     <widget class="QTabWidget" name="Registration">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="TabRadiography">
        <attribute name="title">
@@ -390,7 +396,7 @@
       </widget>
       <widget class="QWidget" name="TabPositioning">
        <attribute name="title">
-        <string>Positioning</string>
+        <string>Repositioning</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_33">
         <item row="0" column="0">
@@ -1464,7 +1470,7 @@
                    <enum>QFrame::Raised</enum>
                   </property>
                   <property name="currentIndex">
-                   <number>2</number>
+                   <number>0</number>
                   </property>
                   <widget class="QWidget" name="Overlay">
                    <property name="geometry">
@@ -1761,8 +1767,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>770</width>
-                     <height>545</height>
+                     <width>403</width>
+                     <height>259</height>
                     </rect>
                    </property>
                    <attribute name="label">
@@ -2700,6 +2706,539 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Active Positioning</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_11">
+        <item row="0" column="2">
+         <widget class="QGroupBox" name="groupBox_20">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Overlay</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_46">
+           <item row="0" column="0">
+            <widget class="matplotlibWidget" name="Display_Fusion" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>300</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>1000000</width>
+               <height>1000000</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QSlider" name="Slider_RegOverlay">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="singleStep">
+              <number>0</number>
+             </property>
+             <property name="value">
+              <number>50</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QPushButton" name="Button_RunReg">
+             <property name="text">
+              <string>Run Registration</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QFrame" name="frame_4">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_48">
+           <item row="3" column="2">
+            <spacer name="verticalSpacer_15">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="2" rowspan="3">
+            <widget class="QGroupBox" name="groupBox_24">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Motor Coordinates</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_51">
+              <item row="3" column="0" colspan="4">
+               <widget class="QPushButton" name="Btn_Reg_calcTable">
+                <property name="text">
+                 <string>Calculate target table position</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="Box_MotorOriginY">
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QDoubleSpinBox" name="Box_MotorOriginX">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+                <property name="decimals">
+                 <number>3</number>
+                </property>
+                <property name="maximum">
+                 <double>1000.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QPushButton" name="Btn_getCurrentMotor">
+                <property name="text">
+                 <string>Get current motor coordinates</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QPushButton" name="Btn_setMotor_Origin">
+                <property name="text">
+                 <string>Set as Motor Origin</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="0" rowspan="4">
+            <widget class="QGroupBox" name="groupBox_21">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Default landmark positions</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_47">
+              <item row="1" column="1">
+               <widget class="QPushButton" name="Button_default_fixed">
+                <property name="text">
+                 <string>Set default positions (fixed)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0" colspan="2">
+               <widget class="QTableWidget" name="CoordsTable">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>160</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>7</pointsize>
+                 </font>
+                </property>
+                <property name="sizeAdjustPolicy">
+                 <enum>QAbstractScrollArea::AdjustToContents</enum>
+                </property>
+                <property name="dragDropOverwriteMode">
+                 <bool>false</bool>
+                </property>
+                <attribute name="verticalHeaderDefaultSectionSize">
+                 <number>28</number>
+                </attribute>
+                <row>
+                 <property name="text">
+                  <string>Marker 1</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Marker 2</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Marker 3</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Marker 4</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Marker 5</string>
+                 </property>
+                </row>
+                <column>
+                 <property name="text">
+                  <string>Moving (default)</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Fixed (default)</string>
+                 </property>
+                </column>
+                <item row="0" column="0">
+                 <property name="text">
+                  <string>655, 534</string>
+                 </property>
+                </item>
+                <item row="0" column="1">
+                 <property name="text">
+                  <string>655, 534</string>
+                 </property>
+                </item>
+                <item row="1" column="0">
+                 <property name="text">
+                  <string>592, 520</string>
+                 </property>
+                </item>
+                <item row="1" column="1">
+                 <property name="text">
+                  <string>592, 520</string>
+                 </property>
+                </item>
+                <item row="2" column="0">
+                 <property name="text">
+                  <string>494, 540</string>
+                 </property>
+                </item>
+                <item row="2" column="1">
+                 <property name="text">
+                  <string>494, 540</string>
+                 </property>
+                </item>
+                <item row="3" column="0">
+                 <property name="text">
+                  <string>602, 586</string>
+                 </property>
+                </item>
+                <item row="3" column="1">
+                 <property name="text">
+                  <string>602, 586</string>
+                 </property>
+                </item>
+                <item row="4" column="0">
+                 <property name="text">
+                  <string>703, 565</string>
+                 </property>
+                </item>
+                <item row="4" column="1">
+                 <property name="text">
+                  <string>703, 565</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QPushButton" name="Button_default_moving">
+                <property name="text">
+                 <string>Set default positions (moving)</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QGroupBox" name="groupBox_22">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="title">
+              <string>Transformation Parameters</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_49">
+              <item row="1" column="0">
+               <widget class="QLabel" name="Label_Trafo_Params">
+                <property name="text">
+                 <string>Parameters:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_15">
+                <property name="text">
+                 <string>Transform: Similarity</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1" rowspan="3">
+            <widget class="QGroupBox" name="groupBox_23">
+             <property name="maximumSize">
+              <size>
+               <width>1000000</width>
+               <height>1000000</height>
+              </size>
+             </property>
+             <property name="title">
+              <string>Target Coordinates</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_43">
+              <item row="0" column="0" rowspan="2">
+               <widget class="QTableWidget" name="table_TrgCoords">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>100</height>
+                 </size>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::NoEditTriggers</set>
+                </property>
+                <attribute name="horizontalHeaderDefaultSectionSize">
+                 <number>76</number>
+                </attribute>
+                <attribute name="horizontalHeaderMinimumSectionSize">
+                 <number>40</number>
+                </attribute>
+                <attribute name="verticalHeaderDefaultSectionSize">
+                 <number>30</number>
+                </attribute>
+                <row>
+                 <property name="text">
+                  <string>Raw</string>
+                 </property>
+                </row>
+                <row>
+                 <property name="text">
+                  <string>Transformed</string>
+                 </property>
+                </row>
+                <column>
+                 <property name="text">
+                  <string>x, y</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Get</string>
+                 </property>
+                </column>
+                <item row="0" column="0">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </item>
+                <item row="1" column="0">
+                 <property name="text">
+                  <string> </string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QGroupBox" name="groupBox_19">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Fixed image</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_45">
+           <item row="1" column="0">
+            <widget class="QPushButton" name="Button_load_fixed">
+             <property name="text">
+              <string>Load Image</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="Label_Fixed">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="matplotlibWidget" name="Display_Fixed" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>300</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>1000000</width>
+               <height>1000000</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_18">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Moving image</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_44">
+           <item row="0" column="0" colspan="2">
+            <widget class="matplotlibWidget" name="Display_Moving" native="true">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>300</width>
+               <height>300</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>1000000</width>
+               <height>1000000</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="Label_Moving">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QPushButton" name="Button_load_moving">
+             <property name="text">
+              <string>Load Image</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="TabMotor">
        <attribute name="title">
         <string>Motor Control</string>
@@ -2910,6 +3449,9 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -2936,7 +3478,7 @@
                  <bool>false</bool>
                 </property>
                 <property name="text">
-                 <string/>
+                 <string>0</string>
                 </property>
                </widget>
               </item>
@@ -3099,6 +3641,64 @@
            </size>
           </property>
          </spacer>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="1" rowspan="2">
+     <widget class="QSplitter" name="splitter_4">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QLabel" name="Logo">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>300</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="pixmap">
+        <pixmap resource="ressources.qrc">:/Imgs/Icons/Pic.jpg</pixmap>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>300</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>Log</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_14">
+        <item row="0" column="0">
+         <layout class="QVBoxLayout" name="LogBox"/>
         </item>
        </layout>
       </widget>
@@ -3659,58 +4259,6 @@
         </widget>
        </item>
       </layout>
-     </widget>
-    </item>
-    <item row="0" column="1" rowspan="2">
-     <widget class="QSplitter" name="splitter_4">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <widget class="QLabel" name="Logo">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>300</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="pixmap">
-        <pixmap resource="ressources.qrc">:/Imgs/Icons/Pic.jpg</pixmap>
-       </property>
-       <property name="scaledContents">
-        <bool>true</bool>
-       </property>
-      </widget>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>200</width>
-         <height>300</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>Log</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_14">
-        <item row="0" column="0">
-         <layout class="QVBoxLayout" name="LogBox"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
