@@ -576,10 +576,10 @@ class MotorControl(object):
             # check this again - are these values correct or LR-inverted?
             if mode == "absolute":
                 logging.info('Moving table to coordinates: x = {:.2f} '
-                             'y = {:.2f}'.format(val[1], val[0]))
+                             'y = {:.2f}'.format(val[0], val[1]))
             else:
                 logging.info('Moving table by: dx = {:.2f} '
-                             'dy = {:.2f}'.format(val[1], val[0]))
+                             'dy = {:.2f}'.format(val[0], val[1]))
 
             self.WatchMovement()
 
@@ -1692,20 +1692,21 @@ class XRay(object):
         GUI.LCD_shift_x.display((Spacing_x * x))
         GUI.LCD_shift_y.display((Spacing_y * y))
 
-
-
-
-
 class Log(object):
-    """ This class handles all choices that can be made in the
-    menu dropdown lists"""
+    """
+    This class handles all choices that can be made in the
+    menu dropdown lists
+    """
 
     def __init__(self):
 
         self.LogDir = os.path.join(os.getcwd(), 'LogFiles')
+        if not os.path.isdir(self.LogDir):
+            os.mkdir(self.LogDir)
 
         # make default place for logfile
-        self.fname = '{:s}_Radi8_LogFile.log'.format(datetime.strftime(datetime.today(), '%y%m%d'))
+        self.fname = "{:s}_Radi8_LogFile.log".format(
+            datetime.strftime(datetime.today(), '%y%m%d'))
         self.fname = os.path.join(self.LogDir, self.fname)
 
         GUI.action_LogLevel_Debug.setChecked(True)

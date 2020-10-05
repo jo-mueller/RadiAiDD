@@ -11,193 +11,81 @@ import cv2
 import os
 
 from PyQt5.QtWidgets import QFileDialog as Qfile
-from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtCore import QObject
+
+from PyQt5.QtWidgets import QToolBar
 
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 from scipy.optimize import minimize
-from Backend.Containers import Crosshair
+from Backend.Containers import GrayWindow2 as GW
+from Backend.Containers import DragPoint
 
 ccycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 
-class Signals(QObject):
-    moving = pyqtSignal()
-
-
-class DragPoint(QWidget):
-
-    lock = None  # only one can be animated at a time
-
-    def __init__(self, parent, x=0.1, y=0.1, size=7, transparent=False,
-                 alpha=0.9, **kwargs):
-        super().__init__()
-
-        if "fc" in kwargs:
-            fc = kwargs["fc"]
-        else:
-            fc = "blue"
-
-        if "edgecolor" in kwargs:
-            ec = kwargs["edgecolor"]
-        else:
-            ec = "white"
-
-        if transparent:
-            fc = "white"
-            alpha = 0.3
-            ec = "black"
-
-        self.parent = parent
-        self.point = patches.Circle((x, y), size, alpha=alpha,
-                                    fc=fc, ec=ec, zorder=10)
-        self.x = x
-        self.y = y
-        self.canvas = parent.canvas
-        self.canvas.axes.add_patch(self.point)
-        self.canvas.draw()
-        self.press = None
-        self.background = None
-        self.connect()
-        self.is_visible = True
-
-        self.Signal = Signals()
-
-    def toggle(self):
-        """Turn this point on and off"""
-        if self.is_visible:
-            self.point.set_visible(False)
-        else:
-            self.point.is_visible(True)
-
-    def remove(self):
-        'make this point invisible'
-        self.point.set_visible(False)
-
-    def connect(self):
-        'connect to all the events we need'
-
-        self.cidpress = self.point.figure.canvas.mpl_connect(
-            'button_press_event', self.on_press)
-        self.cidrelease = self.point.figure.canvas.mpl_connect(
-            'button_release_event', self.on_release)
-        self.cidmotion = self.point.figure.canvas.mpl_connect(
-            'motion_notify_event', self.on_motion)
-
-    def on_press(self, event):
-
-        if event.inaxes != self.point.axes:
-            return
-        if DragPoint.lock is not None:
-            return
-        contains, attrd = self.point.contains(event)
-        if not contains:
-            return
-        self.press = (self.point.center), event.xdata, event.ydata
-        DragPoint.lock = self
-
-        # draw everything but the selected rectangle and store the pixel buffer
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        self.point.set_animated(True)
-
-        canvas.draw()
-        self.background = canvas.copy_from_bbox(self.point.axes.bbox)
-
-        # now redraw just the rectangle
-        axes.draw_artist(self.point)
-
-        # and blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-    @pyqtSlot()
-    def on_motion(self, event):
-
-        if DragPoint.lock is not self:
-            return
-        if event.inaxes != self.point.axes:
-            return
-        self.point.center, xpress, ypress = self.press
-        dx = event.xdata - xpress
-        dy = event.ydata - ypress
-        self.point.center = (self.point.center[0]+dx, self.point.center[1]+dy)
-
-        canvas = self.point.figure.canvas
-        axes = self.point.axes
-        # restore the background region
-        canvas.restore_region(self.background)
-
-        # redraw just the current rectangle
-        axes.draw_artist(self.point)
-
-        self.x = self.point.center[0]
-        self.y = self.point.center[1]
-
-        # blit just the redrawn area
-        canvas.blit(axes.bbox)
-
-        # emit signal with coordinates of this point
-        self.Signal.moving.emit()
-
-    def on_release(self, event):
-        'on release we reset the press data'
-
-        if DragPoint.lock is not self:
-            return
-
-        self.press = None
-        DragPoint.lock = None
-
-        # turn off the rect animation property and reset the background
-        self.point.set_animated(False)
-
-        self.background = None
-
-        # redraw the full figure
-        self.point.figure.canvas.draw()
-
-        self.x = self.point.center[0]
-        self.y = self.point.center[1]
-
-    def disconnect(self):
-        'disconnect all the stored connection ids'
-
-        self.point.figure.canvas.mpl_disconnect(self.cidpress)
-        self.point.figure.canvas.mpl_disconnect(self.cidrelease)
-        self.point.figure.canvas.mpl_disconnect(self.cidmotion)
-
-    def setCoords(self, x, y):
-        'update the coordinates from the outside'
-        self.x = x
-        self.y = y
-        self.point.center = (x, y)
-        self.point.figure.canvas.draw()
-
-
 class DisplayObject:
-    def __init__(self, canvas, label):
+    def __init__(self, canvas, label, GrayControl=None, **kwargs):
         self.canvas = canvas
         self.Qlabel = label
 
         self.GUI = self.getGUI()
+        self.GrayControl = GrayControl
+        self.overlay = None  # storage for overlay image array
+        self.has_overlay = False  # Flag that tells whether image has overlay
+        self.overlay_active = False  #Flag that tells if overlay is active
 
     def load_Image(self):
+        """
+        Rule: Image is loaded and fliped upside down so that the display
+        option origin=lower will result in correct display.
+        If the imported image has more than two dimensions (i.e. has an
+        additional layer vontaining only the overlayed brain mask),
+        then one additional layer is stored in here - only one!
+        """
         fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
                                          "", "(*.tif)")
         # If no file is chosen:
         if not fname:
             return 0
 
-        self.array = tifffile.imread(fname)
-        self.canvas.axes.imshow(self.array, cmap='gray')
-        self.canvas.draw()
+        data = tifffile.imread(fname)
+        if len(data.shape) > 2:
+            self.overlay = np.flipud(data[1, :, :]).astype(float)
+            self.overlay[self.overlay == 0] = np.nan
+            self.array = np.flipud(data[0, :, :])
+            self.has_overlay = True
+        else:
+            self.array = np.flipud(data)
+
+        self.h_img = self.display(cmap='gray')
         self.Qlabel.setText(fname)
 
-        # get values listed in table to be drawn on newly loaded figure
+        logging.info('Successfully imported {:s}'.format(fname))
+        self.GUI.WindowSelector.setEnabled(True)
+
+        self.GrayControl.fill(self.array)
+
+    def display(self, **kwargs):
+        handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
+        self.canvas.draw()
+        self.is_active = True
+        return handle
+
+    def toggleOverlay(self):
+        'Switches the overlay on and off, provided it exists'
+        if not self.has_overlay:
+            return 0
+
+        if self.overlay_active:
+            self.h_overlay.set_visible(False)
+            self.canvas.draw()
+            self.overlay_active = False
+        else:
+            self.h_overlay = self.canvas.axes.imshow(self.overlay,
+                                                     cmap='Oranges',
+                                                     origin='lower', alpha=0.5)
+            self.canvas.draw()
+            self.overlay_active = True
 
     def get_array(self):
         return self.array
@@ -232,9 +120,39 @@ class Registration:
                                     self.GUI.Label_Moving)
         self.Fixed = DisplayObject(self.GUI.Display_Fixed.canvas,
                                    self.GUI.Label_Fixed)
+        self.Warped = DisplayObject(self.GUI.Display_Fusion.canvas,
+                                    None)
+
+        # GrayWIndow control for both images
+        GrayObj_M = GW(self.Moving.canvas,
+                       self.GUI.ActPos_GreyWindow_Hist.canvas,
+                       self.GUI.ActPos_Slider_Center,
+                       self.GUI.ActPos_SliderRange,
+                       self.GUI.ActPos_Label_Center_Alignment,
+                       self.GUI.ActPos_Label_Range_Alignment)
+        GrayObj_F = GW(self.Fixed.canvas,
+                       self.GUI.ActPos_GreyWindow_Hist.canvas,
+                       self.GUI.ActPos_Slider_Center,
+                       self.GUI.ActPos_SliderRange,
+                       self.GUI.ActPos_Label_Center_Alignment,
+                       self.GUI.ActPos_Label_Range_Alignment)
+        self.Fixed.GrayControl = GrayObj_F
+        self.Moving.GrayControl = GrayObj_M
+        self.Fixed.GrayControl.histcolor = 'blue'
+        self.Moving.GrayControl.histcolor = 'orange'
 
         self.GUI.Button_load_moving.clicked.connect(self.Moving.load_Image)
         self.GUI.Button_load_fixed.clicked.connect(self.Fixed.load_Image)
+
+        # Allocate connections for grayvalue control
+        self.GUI.WindowSelector.addItem("")
+        self.GUI.WindowSelector.addItem("Moving image (X-Ray)")
+        self.GUI.WindowSelector.addItem("Target image (Radiography)")
+        self.GUI.WindowSelector.currentIndexChanged.connect(self.greyscale)
+        self.GUI.ActPos_GreyWindow_Hist.findChild(QToolBar).setVisible(False)
+
+        # Control for overlay function
+        self.GUI.Button_toggleOverlay.clicked.connect(self.toggleOverlay)
 
         # Buttons for default marker positions
         self.GUI.Button_default_moving.clicked.connect(
@@ -257,12 +175,16 @@ class Registration:
         self.LM_moving = []
         self.LM_fixed = []
 
-        self.default_moving = [[625, 518],
-                               [592, 520],
-                               [494, 540],
-                               [635, 575],
-                               [703, 565]]
-        self.default_fixed = self.default_moving
+        self.default_moving = [[627, 489],
+                               [484, 473],
+                               [590, 498],
+                               [643, 438],
+                               [703, 443]]
+        self.default_fixed = [[603, 368],
+                              [336, 332],
+                              [502, 362],
+                              [607, 267],
+                              [704, 281]]
 
         # Flags
         self.PointsOnCanvas_moving = False
@@ -275,8 +197,49 @@ class Registration:
         self.sliderconnected = False
         logging.info('Registration class successfully initialized')
 
+    def toggleOverlay(self):
+        'Shows the overlay of image if it exists'
+
+        # Has an overlay been passed to the moving image?
+        # Only moving image can have overlay.
+        if not self.Moving.has_overlay:
+            logging.info("Current moving image does not have an overlay")
+            return 0
+        else:
+            self.Moving.toggleOverlay()
+
+        if self.Warped.has_overlay:
+            self.Warped.toggleOverlay()
+        else:
+            return 0
+
+        if self.Warped.overlay_active != self.Moving.overlay_active:
+            self.Warped.toggleOverlay()
+
+    def greyscale(self):
+        'Assigns the image controls to the chosen display if required.'
+
+        # Try to disconnect upon connecting again
+        self.Moving.GrayControl.deactivate()
+        self.Fixed.GrayControl.deactivate()
+
+        if self.GUI.WindowSelector.currentIndex() == 1:
+            self.Moving.GrayControl.activate()
+        elif self.GUI.WindowSelector.currentIndex() == 2:
+            self.Fixed.GrayControl.activate()
+        else:
+            return 0
+
     def calcMotor(self):
         'Calculates Motor target coordinates'
+
+        if self.GUI.TableTxt_x.text() == "":
+            logging.error("No Motor coordinates given")
+            return 0
+        if self.GUI.SpotTxt_x.text() == "":
+            logging.error("No Isocenter coordinates given")
+            return 0
+
         x_Table = float(self.GUI.TableTxt_x.text())
         y_Table = float(self.GUI.TableTxt_y.text())
 
@@ -291,10 +254,12 @@ class Registration:
         # calculate table movement
         # y is inverted because image y-axis is inverted, too
         x = x_Table + (x_Iso - x_Target) * 0.05  # mm
-        y = y_Table + (-1) * (y_Iso - y_Target) * 0.05  # mm
+        y = y_Table + (y_Iso - y_Target) * 0.05  # mm
 
         self.GUI.TableTxt_xCorr.setText("{:.2f}".format(x))
         self.GUI.TableTxt_yCorr.setText("{:.2f}".format(y))
+        logging.info("Calculated motor target position: (x={:.2f}, y={:.2f}"
+                     .format(x, y))
 
     def setMotorOrigin(self):
         'Copies Motor origin to GUI'
@@ -302,6 +267,8 @@ class Registration:
         y = self.GUI.Box_MotorOriginY.value()
         self.GUI.TableTxt_x.setText("{:.3f}".format(x))
         self.GUI.TableTxt_y.setText("{:.3f}".format(y))
+        logging.info("Set motor origin position to (x={:.2f}, y={:.2f}"
+                     .format(x, y))
 
     def getCurrentMotorPos(self):
         'Assumes currently set motor position as position of active RG image'
@@ -309,6 +276,8 @@ class Registration:
         y = float(self.GUI.TablePosY.text())
         self.GUI.Box_MotorOriginX.setValue(x)
         self.GUI.Box_MotorOriginY.setValue(y)
+        logging.info("Current motor position: (x={:.2f}, y={:.2f}"
+                     .format(x, y))
 
     def get_raw_target(self):
         """
@@ -327,7 +296,9 @@ class Registration:
                 elif "y" in piece:
                     y = int(piece.split("y")[0])
 
-            except ValueError:
+            except Exception:
+                logging.error("Target coordinates could not be " +
+                              "inferred from filename")
                 continue
 
         # If a target already exists, remove old one
@@ -335,8 +306,12 @@ class Registration:
             self.TrgRaw.toggle()
             del(self.TrgRaw)
 
+        if x == "":
+            center = np.asarray(self.Moving.array.shape)/2
+            x, y = center[0], center[1]
+
         self.TrgRaw = DragPoint(self.GUI.Display_Moving, x=x, y=y,
-                                transparent=True, size=30)
+                                transparent=True, size=30/2.0)
         self.GUI.table_TrgCoords.item(0, 0).setText("{:.0f}, {:.0f}"
                                                     .format(x, y))
         self.TrgRaw.Signal.moving.connect(self.updateRawTarget)
@@ -356,7 +331,8 @@ class Registration:
 
         # Have landmarks been defined?
         if not (self.PointsOnCanvas_fixed and self.PointsOnCanvas_moving):
-            logging.info("Missing data for registration.")
+            logging.error("Missing data (image data or landmarks)" +
+                          " for registration.")
             return 0
 
         vA = [(P.x, P.y) for P in self.LM_fixed]
@@ -366,18 +342,25 @@ class Registration:
         options = {"maxiter": 3000}
         res = minimize(self.cost_function, initial_guess, args=(vA, vB),
                        method='SLSQP', options=options)
-        logging.info("Similarity transform optimization result:")
-        logging.info(res)
+        logging.info("Similarity transform optimization result:\n" +
+                     "Success: {:b}, n_evals = {:d}\n"
+                     .format(res.success, res.nfev) +
+                     "scale={:.2f}, angle={:.2f}°, t=({:.1f}, {:.1f})"
+                     .format(res.x[0], res.x[1], res.x[2], res.x[3]))
 
         # Transform and display warped image
-        Warped = self.ImageTransform(self.Moving.get_array(), res.x)
+        # Allocate new display Object(s) for this purpose
+        self.Warped.array = self.ImageTransform(self.Moving.array, res.x)
+
+        if self.Moving.has_overlay:
+            self.Warped.overlay = self.ImageTransform(self.Moving.overlay, res.x)
+            self.Warped.has_overlay = True
 
         canvas = self.GUI.Display_Fusion.canvas
         canvas.axes.clear()
         canvas.axes.imshow(self.Fixed.get_array(), cmap='gray',
-                           alpha=0.5, interpolation='nearest')
-        canvas.axes.imshow(Warped, cmap='gray',
-                           alpha=0.5, interpolation='nearest')
+                           alpha=0.5, interpolation='nearest', origin='lower')
+        self.Warped.display(alpha=0.5, interpolation='nearest', cmap='gray')
         canvas.draw()
 
         # Transform target coordinates.
@@ -395,7 +378,7 @@ class Registration:
 
             self.TrfTrgPoint = DragPoint(self.GUI.Display_Fusion,
                                          x=r[0], y=r[1],
-                                         transparent=True, size=30*res.x[0])
+                                         transparent=True, size=30/2.0*res.x[0])
         except ValueError:
             pass
 
@@ -488,8 +471,9 @@ class Registration:
         return np.sqrt(np.sum(np.power(np.subtract(x1, x2), 2)))
 
     def setDefaultPositions(self, which):
-
-        # Which dataset? moving or fixed?
+        # ______
+        # MOVING
+        # ______
         if which == "moving":
             QObj = self.GUI.Display_Moving
 
@@ -511,6 +495,9 @@ class Registration:
                 self.LM_moving.append(point)
             self.PointsOnCanvas_moving = True
 
+        # ______
+        # FIXED
+        # ______
         elif which == "fixed":
             QObj = self.GUI.Display_Fixed
 
@@ -524,14 +511,34 @@ class Registration:
 
             # add the default draggable points to the figure
             # Use same coordinates as in moving image
-            for i in range(len(self.default_moving)):
-                point = DragPoint(QObj, self.default_moving[i][0],
-                                  self.default_moving[i][1],
+            for i in range(len(self.default_fixed)):
+                point = DragPoint(QObj, self.default_fixed[i][0],
+                                  self.default_fixed[i][1],
                                   fc=ccycle[i % len(ccycle)],
-                                  size=9)
+                                  size=5)
                 point.Signal.moving.connect(lambda: self.updateTable("fixed"))
                 self.LM_fixed.append(point)
             self.PointsOnCanvas_fixed = True
+
+        # Now: Take care of sliders for markersize
+        if which == "moving":
+            self.GUI.Slider_MarkerSize_Moving.setEnabled(True)
+            self.GUI.Slider_MarkerSize_Moving.valueChanged.connect(
+                self.setMMarkerSize)
+
+        elif which == "fixed":
+            self.GUI.Slider_MarkerSize_Fixed.setEnabled(True)
+            self.GUI.Slider_MarkerSize_Fixed.valueChanged.connect(
+                self.setFMarkerSize)
+
+    def setMMarkerSize(self):
+        'Change size of landmarks in moving image'
+        for m in self.LM_moving:
+            m.setSize(self.GUI.Slider_MarkerSize_Moving.value()/2.0)
+
+    def setFMarkerSize(self):
+        for m in self.LM_fixed:
+            m.setSize(self.GUI.Slider_MarkerSize_Fixed.value()/2.0)
 
     def updateTable(self, which):
         "update the table if the markers are moved"
