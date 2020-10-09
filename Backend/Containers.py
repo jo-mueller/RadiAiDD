@@ -521,7 +521,7 @@ class GrayWindow2(QObject):
         # self.histcanvas.draw()
 
     def activate(self):
-        self.SliderCenter.setMinimum(0)
+        self.SliderCenter.setMinimum(self.clim[0])
         self.SliderCenter.setMaximum(self.clim[1])
         self.SliderRange.setMinimum(1)
         self.SliderRange.setMaximum(np.diff(self.clim))

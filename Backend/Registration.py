@@ -57,6 +57,13 @@ class DisplayObject:
         else:
             self.array = np.flipud(data)
 
+        # zero padding
+        if self.has_overlay:
+            self.array = self.zeropadding(self.array, 1032, 1012)
+            self.overlay = self.zeropadding(self.overlay, 1032, 1012)
+        else:
+            self.array = self.zeropadding(self.array, 1032, 1012)
+
         self.h_img = self.display(cmap='gray')
         self.Qlabel.setText(fname)
 
@@ -65,7 +72,19 @@ class DisplayObject:
 
         self.GrayControl.fill(self.array)
 
+    def zeropadding(self, array, width, height):
+        'This function embedds the X-Ray image(s) within a zero-padded image'
+        if array.shape[0] < width and array.shape[1] < height:
+            new_array = np.zeros((height, width))
+            x = int((width - array.shape[1])/2.0)
+            y = int((height - array.shape[0])/2.0)
+            new_array[y:y + array.shape[0], x:x + array.shape[1]] = array
+            return new_array
+        else:
+            return array
+
     def display(self, **kwargs):
+        self.canvas.axes.clear()
         handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
         self.canvas.draw()
         self.is_active = True
@@ -357,10 +376,9 @@ class Registration:
             self.Warped.has_overlay = True
 
         canvas = self.GUI.Display_Fusion.canvas
-        canvas.axes.clear()
+        self.Warped.display(alpha=0.5, interpolation='nearest', cmap='gray')
         canvas.axes.imshow(self.Fixed.get_array(), cmap='gray',
                            alpha=0.5, interpolation='nearest', origin='lower')
-        self.Warped.display(alpha=0.5, interpolation='nearest', cmap='gray')
         canvas.draw()
 
         # Transform target coordinates.
