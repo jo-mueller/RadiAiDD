@@ -19,108 +19,9 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from Backend.Containers import GrayWindow2 as GW
 from Backend.Containers import DragPoint
+from Backend.Containers import DisplayObject
 
 ccycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-
-
-class DisplayObject:
-    def __init__(self, canvas, label, GrayControl=None, **kwargs):
-        self.canvas = canvas
-        self.Qlabel = label
-
-        self.GUI = self.getGUI()
-        self.GrayControl = GrayControl
-        self.overlay = None  # storage for overlay image array
-        self.has_overlay = False  # Flag that tells whether image has overlay
-        self.overlay_active = False  #Flag that tells if overlay is active
-
-    def load_Image(self):
-        """
-        Rule: Image is loaded and fliped upside down so that the display
-        option origin=lower will result in correct display.
-        If the imported image has more than two dimensions (i.e. has an
-        additional layer vontaining only the overlayed brain mask),
-        then one additional layer is stored in here - only one!
-        """
-        fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
-                                         "", "(*.tif)")
-        # If no file is chosen:
-        if not fname:
-            return 0
-
-        data = tifffile.imread(fname)
-        if len(data.shape) > 2:
-            self.overlay = np.flipud(data[1, :, :]).astype(float)
-            self.overlay[self.overlay == 0] = np.nan
-            self.array = np.flipud(data[0, :, :])
-            self.has_overlay = True
-        else:
-            self.array = np.flipud(data)
-
-        # zero padding
-        if self.has_overlay:
-            self.array = self.zeropadding(self.array, 1032, 1012)
-            self.overlay = self.zeropadding(self.overlay, 1032, 1012)
-        else:
-            self.array = self.zeropadding(self.array, 1032, 1012)
-
-        self.h_img = self.display(cmap='gray')
-        self.Qlabel.setText(fname)
-
-        logging.info('Successfully imported {:s}'.format(fname))
-        self.GUI.WindowSelector.setEnabled(True)
-
-        self.GrayControl.fill(self.array)
-
-    def zeropadding(self, array, width, height):
-        'This function embedds the X-Ray image(s) within a zero-padded image'
-        if array.shape[0] < width and array.shape[1] < height:
-            new_array = np.zeros((height, width))
-            x = int((width - array.shape[1])/2.0)
-            y = int((height - array.shape[0])/2.0)
-            new_array[y:y + array.shape[0], x:x + array.shape[1]] = array
-            return new_array
-        else:
-            return array
-
-    def display(self, **kwargs):
-        self.canvas.axes.clear()
-        handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
-        self.canvas.draw()
-        self.is_active = True
-        return handle
-
-    def toggleOverlay(self):
-        'Switches the overlay on and off, provided it exists'
-        if not self.has_overlay:
-            return 0
-
-        if self.overlay_active:
-            self.h_overlay.set_visible(False)
-            self.canvas.draw()
-            self.overlay_active = False
-        else:
-            self.h_overlay = self.canvas.axes.imshow(self.overlay,
-                                                     cmap='Oranges',
-                                                     origin='lower', alpha=0.5)
-            self.canvas.draw()
-            self.overlay_active = True
-
-    def get_array(self):
-        return self.array
-
-    def get_fname(self):
-        return self.Qlabel.getText()
-
-    def getGUI(self):
-        """Identify parent GUI"""
-
-        widget = self.canvas
-        hasParent = True
-        while hasParent:
-            widget = widget.parentWidget()
-            if widget.parentWidget() is None:
-                return widget
 
 
 class Registration:
@@ -135,30 +36,32 @@ class Registration:
         self.GUI.table_TrgCoords.setCellWidget(0, 1, self.Btn_get_raw_trg)
         self.Btn_get_raw_trg.clicked.connect(self.get_raw_target)
 
+        # Allocate Display objects
         self.Moving = DisplayObject(self.GUI.Display_Moving.canvas,
                                     self.GUI.Label_Moving)
         self.Fixed = DisplayObject(self.GUI.Display_Fixed.canvas,
                                    self.GUI.Label_Fixed)
-        self.Warped = DisplayObject(self.GUI.Display_Fusion.canvas,
-                                    None)
+        self.WarpedMoving = DisplayObject(self.GUI.Display_Fusion.canvas,
+                                          None)
+        self.WarpedFixed = DisplayObject(self.GUI.Display_Fusion.canvas,
+                                         None)
 
-        # GrayWIndow control for both images
-        GrayObj_M = GW(self.Moving.canvas,
-                       self.GUI.ActPos_GreyWindow_Hist.canvas,
-                       self.GUI.ActPos_Slider_Center,
-                       self.GUI.ActPos_SliderRange,
-                       self.GUI.ActPos_Label_Center_Alignment,
-                       self.GUI.ActPos_Label_Range_Alignment)
-        GrayObj_F = GW(self.Fixed.canvas,
-                       self.GUI.ActPos_GreyWindow_Hist.canvas,
-                       self.GUI.ActPos_Slider_Center,
-                       self.GUI.ActPos_SliderRange,
-                       self.GUI.ActPos_Label_Center_Alignment,
-                       self.GUI.ActPos_Label_Range_Alignment)
-        self.Fixed.GrayControl = GrayObj_F
-        self.Moving.GrayControl = GrayObj_M
-        self.Fixed.GrayControl.histcolor = 'blue'
-        self.Moving.GrayControl.histcolor = 'orange'
+        # Assign Graywindow controls
+        hc = self.GUI.ActPos_GreyWindow_Hist.canvas
+        cntr = self.GUI.ActPos_Slider_Center
+        rng = self.GUI.ActPos_SliderRange
+        txtcntr = self.GUI.ActPos_Label_Center_Alignment
+        txtrng = self.GUI.ActPos_Label_Range_Alignment
+
+        self.Moving.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.Fixed.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.WarpedMoving.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.WarpedFixed.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+
+        self.Fixed.GC.histcolor = 'blue'
+        self.Moving.GC.histcolor = 'orange'
+        self.WarpedFixed.GC.histcolor = None
+        self.WarpedMoving.GC.histcolor = None
 
         self.GUI.Button_load_moving.clicked.connect(self.Moving.load_Image)
         self.GUI.Button_load_fixed.clicked.connect(self.Fixed.load_Image)
@@ -227,25 +130,32 @@ class Registration:
         else:
             self.Moving.toggleOverlay()
 
-        if self.Warped.has_overlay:
-            self.Warped.toggleOverlay()
+        if self.WarpedMoving.has_overlay:
+            self.WarpedMoving.toggleOverlay()
         else:
             return 0
 
-        if self.Warped.overlay_active != self.Moving.overlay_active:
-            self.Warped.toggleOverlay()
+        if self.WarpedMoving.overlay_active != self.Moving.overlay_active:
+            self.WarpedMoving.toggleOverlay()
 
     def greyscale(self):
         'Assigns the image controls to the chosen display if required.'
 
         # Try to disconnect upon connecting again
-        self.Moving.GrayControl.deactivate()
-        self.Fixed.GrayControl.deactivate()
+        self.Moving.GC.deactivate()
+        self.Fixed.GC.deactivate()
+        self.WarpedFixed.GC.deactivate()
+        self.WarpedMoving.GC.deactivate()
 
         if self.GUI.WindowSelector.currentIndex() == 1:
-            self.Moving.GrayControl.activate()
+            self.Moving.GC.activate()
+            if self.ImageOnFusion:
+                self.WarpedMoving.GC.activate()
+
         elif self.GUI.WindowSelector.currentIndex() == 2:
-            self.Fixed.GrayControl.activate()
+            self.Fixed.GC.activate()
+            if self.ImageOnFusion:
+                self.WarpedFixed.GC.activate()
         else:
             return 0
 
@@ -367,19 +277,19 @@ class Registration:
                      "scale={:.2f}, angle={:.2f}°, t=({:.1f}, {:.1f})"
                      .format(res.x[0], res.x[1], res.x[2], res.x[3]))
 
-        # Transform and display warped image
+        # Transform and display warped/fixed image
         # Allocate new display Object(s) for this purpose
-        self.Warped.array = self.ImageTransform(self.Moving.array, res.x)
+        self.WarpedMoving.array = self.ImageTransform(self.Moving.array, res.x)
+        self.WarpedFixed.array = self.Fixed.array
 
         if self.Moving.has_overlay:
-            self.Warped.overlay = self.ImageTransform(self.Moving.overlay, res.x)
-            self.Warped.has_overlay = True
+            self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x)
+            self.WarpedMoving.has_overlay = True
 
-        canvas = self.GUI.Display_Fusion.canvas
-        self.Warped.display(alpha=0.5, interpolation='nearest', cmap='gray')
-        canvas.axes.imshow(self.Fixed.get_array(), cmap='gray',
-                           alpha=0.5, interpolation='nearest', origin='lower')
-        canvas.draw()
+        self.WarpedMoving.display(alpha=0.5, interpolation='nearest',
+                                  cmap='gray')
+        self.WarpedFixed.display(alpha=0.5, clear=False,
+                                 interpolation='nearest', cmap='gray')
 
         # Transform target coordinates.
         # A target may not have been defined yet. Throws ValueError if no
@@ -413,6 +323,8 @@ class Registration:
             self.GUI.Slider_RegOverlay.valueChanged.connect(self.adjust_alpha)
             self.sliderconnected = True
 
+        self.ImageOnFusion = True
+
     def ImageTransform(self, Img, params):
         """
         Function for similarity transform of given input Image
@@ -445,11 +357,8 @@ class Registration:
         alpha = float(self.GUI.Slider_RegOverlay.value()/100.0)
 
         # Get handles to both images and adjust alpha
-        images = self.GUI.Display_Fusion.canvas.axes.get_images()
-        Fixed = images[0]
-        Warped = images[1]
-        Fixed.set_alpha(alpha)
-        Warped.set_alpha(1.0-alpha)
+        self.WarpedFixed.handle.set_alpha(alpha)
+        self.WarpedMoving.handle.set_alpha(1.0-alpha)
 
         # Update
         self.GUI.Display_Fusion.canvas.draw()

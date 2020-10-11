@@ -12,10 +12,13 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QFileDialog as Qfile
 
 import numpy as np
 import pydicom as dicom
 import traceback
+import tifffile
+import logging
 
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
@@ -473,21 +476,150 @@ class OverlayImage(QObject):
         self.y_shift = 0
 
 
-class GrayWindow2(QObject):
-    def __init__(self, MainCanv, HistCanv, SliderCenter, SliderRange,
-                 TxtCtr, TxtRng):
-        QObject.__init__(self)
+class DisplayObject:
+    def __init__(self, canvas, label, GrayControl=None, **kwargs):
+        self.canvas = canvas
+        self.Qlabel = label
+
+        self.array = None
+        self.overlay = None
+        self.handle = None
+        self.GC = None  # No graywindow control assigned by default
+
+        self.GUI = self.getGUI()
+        self.overlay = None  # storage for overlay image array
+        self.has_overlay = False  # Flag that tells whether image has overlay
+        self.overlay_active = False  # Flag that tells if overlay is active
+
+    def load_Image(self):
+        """
+        Rule: Image is loaded and fliped upside down so that the display
+        option origin=lower will result in correct display.
+        If the imported image has more than two dimensions (i.e. has an
+        additional layer vontaining only the overlayed brain mask),
+        then one additional layer is stored in here - only one!
+        """
+        fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
+                                         "", "(*.tif)")
+        # If no file is chosen:
+        if not fname:
+            return 0
+
+        data = tifffile.imread(fname)
+        data = self.normalize(data, 256.0)
+        if len(data.shape) > 2:
+            self.overlay = np.flipud(data[1, :, :]).astype(float)
+            self.overlay[self.overlay == 0] = np.nan
+            self.array = np.flipud(data[0, :, :])
+            self.has_overlay = True
+        else:
+            self.array = np.flipud(data)
+
+        # zero padding
+        if self.has_overlay:
+            self.array = self.zeropadding(self.array, 1032, 1012)
+            self.overlay = self.zeropadding(self.overlay, 1032, 1012)
+        else:
+            self.array = self.zeropadding(self.array, 1032, 1012)
+
+        self.handle = self.display(cmap='gray')
+        self.Qlabel.setText(fname)
+
+        logging.info('Successfully imported {:s}'.format(fname))
+        self.GUI.WindowSelector.setEnabled(True)
+
+    def normalize(self, data, N):
+        return N*(data - np.min(data))/(np.max(data) - np.min(data))
+
+    def zeropadding(self, array, width, height):
+        'This function embedds the X-Ray image(s) within a zero-padded image'
+        if array.shape[0] < width and array.shape[1] < height:
+            new_array = np.zeros((height, width))
+            x = int((width - array.shape[1])/2.0)
+            y = int((height - array.shape[0])/2.0)
+            new_array[y:y + array.shape[0], x:x + array.shape[1]] = array
+            return new_array
+        else:
+            return array
+
+    def display(self, clear=True, **kwargs):
+        """
+        Display function to paint array in self on canvas.
+        By default removes previous image on this canvas.
+        """
+        if clear:
+            self.canvas.axes.clear()
+        handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
+        self.handle = handle
+        self.canvas.draw()
+        self.is_active = True
+        return handle
+
+    def toggleOverlay(self):
+        'Switches the overlay on and off, provided it exists'
+        if not self.has_overlay:
+            return 0
+
+        if self.overlay_active:
+            self.h_overlay.set_visible(False)
+            self.canvas.draw()
+            self.overlay_active = False
+        else:
+            self.h_overlay = self.canvas.axes.imshow(self.overlay,
+                                                     cmap='Oranges',
+                                                     origin='lower', alpha=0.5)
+            self.canvas.draw()
+            self.overlay_active = True
+
+    def set_clim(self, cntr, rng):
+        "Adjuts graywindow of self object if displayed"
+
+        # CHeck if array has already been provided
+        if self.handle is None:
+            return 0
+
+        self.handle.set_clim(cntr - rng/2, cntr + rng/2)
+        self.canvas.draw()
+        return 1
+
+    def get_array(self):
+        return self.array
+
+    def get_fname(self):
+        return self.Qlabel.getText()
+
+    def getGUI(self):
+        """Identify parent GUI"""
+
+        widget = self.canvas
+        hasParent = True
+        while hasParent:
+            widget = widget.parentWidget()
+            if widget.parentWidget() is None:
+                return widget
+
+    def assign_graycontrol(self, HistCanv, SliderCenter, SliderRange,
+                           TxtCtr, TxtRng):
+        "Assigns a graywindow control instince for this display object"
+        self.GC = GrayWindow2(HistCanv, SliderCenter, SliderRange,
+                              TxtCtr, TxtRng, self)
+
+
+class GrayWindow2:
+    def __init__(self, HistCanv, SliderCenter, SliderRange,
+                 TxtCtr, TxtRng, owner):
+        self.owner = owner
         self.SliderCenter = SliderCenter
         self.SliderRange = SliderRange
 
         self.TextCenter = TxtCtr
         self.TextRange = TxtRng
-        self.canvas = MainCanv
         self.histcanvas = HistCanv
 
         self.is_active = False
         self.histcolor = 'blue'
-        
+        self.is_filled = False
+
         # defaults for histogram
         self.clim = [0, 100]
         self.center = 0
@@ -496,31 +628,37 @@ class GrayWindow2(QObject):
         self.barwidth = 1
         self.nbins = 150
 
-    def fill(self, data):
+    def fill(self):
         """
             Fills the graywindow control with actual values
         """
 
-        self.data = data.flatten()
-        self.data = data[data != 0]  # remove zeros from dataset
-        self.clim = [np.min(data), np.max(data)]
-        self.center = np.median(self.clim)
-        self.range = 3*np.std(self.data)
-        self.hist = np.histogram(self.data, self.nbins)
+        if self.owner.array is None:
+            return 0
+
+        # Include only non-zero data in the subsequent calculation
+        self.clim = self.owner.handle.get_clim()
+        self.range = np.diff(self.clim)
+        self.center = self.clim[0] + self.range/2.0
+
+        # Histogram
+        data = self.owner.array.flatten()
+        data = data[data != 0.0]
+        self.hist = np.histogram(data, self.nbins)
         self.barwidth = np.mean(np.diff(self.hist[1]))
-
-        # self.SliderRange.setValue(self.range)
-        # self.SliderCenter.setValue(self.center)
-        # self.TextRange.setText("{:d}".format(int(self.range)))
-        # self.TextCenter.setText("{:d}".format(int(self.center)))
-
-        # # Display
-        # self.histcanvas.axes.clear()
-        # self.histcanvas.axes.bar(self.hist[1][:-1], height=self.hist[0],
-        #                          color=self.histcolor, width=self.barwidth)
-        # self.histcanvas.draw()
+        self.is_filled = True
 
     def activate(self):
+        """
+        Activates control of sliders over parent's graywindowing and the
+        widgets that belong to this graywindow, such as a canvas for the
+        histogram and textfields for the window values
+        """
+
+        # When activated, check for input data
+        if not self.is_filled:
+            self.fill()
+
         self.SliderCenter.setMinimum(self.clim[0])
         self.SliderCenter.setMaximum(self.clim[1])
         self.SliderRange.setMinimum(1)
@@ -534,11 +672,12 @@ class GrayWindow2(QObject):
         self.SliderCenter.valueChanged.connect(self.update)
         self.SliderRange.valueChanged.connect(self.update)
         self.is_active = True
-        
+
         self.histcanvas.axes.clear()
         self.histcanvas.axes.bar(self.hist[1][:-1], height=self.hist[0],
                                  color=self.histcolor, width=self.barwidth)
         self.histcanvas.draw()
+        self.update()
 
     def deactivate(self):
         try:
@@ -559,11 +698,7 @@ class GrayWindow2(QObject):
         self.TextCenter.setText("{:d}".format(int(self.center)))
         self.TextRange.setText("{:d}".format(int(self.range)))
 
-        axes = self.canvas.axes
-        for im in axes.get_images():
-            im.set_clim(self.center - self.range/2,
-                        self.center + self.range/2)
-        self.canvas.draw()
+        self.owner.set_clim(self.center, self.range)
         self.histcanvas.axes.set_xlim([self.center - self.range/2,
                                        self.center + self.range/2])
         self.histcanvas.axes.set_ylim([0, np.max(self.hist[0])])
@@ -574,7 +709,7 @@ class GrayWindow(QObject):
     """
     SliderCenter, SliderRange, TextCenter, TextRange, canvas, histcanvas, data
     Class that is used to adjust GrayWindow of Planar Scans
-    
+    (DEPRECATED)
     """
 
     def __init__(self, SliderCenter, SliderRange,
@@ -598,7 +733,7 @@ class GrayWindow(QObject):
         self.SliderCenter.setMaximum(self.cmax)
         self.SliderRange.setMinimum(0)
         self.SliderRange.setMaximum(center*2)
-        
+
         # set default greyvalues only when text labels display zero.
         # Else, the slider has probably already been used and it is desirable
         # to keep the previously set grey setting
