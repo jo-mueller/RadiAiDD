@@ -4,20 +4,17 @@ Created on Wed Aug 19 20:08:38 2020
 
 @author: johan
 """
-import tifffile
 import logging
 import numpy as np
 import cv2
 import os
 
-from PyQt5.QtWidgets import QFileDialog as Qfile
 from PyQt5.QtWidgets import QPushButton
 
 from PyQt5.QtWidgets import QToolBar
 
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-from Backend.Containers import GrayWindow2 as GW
 from Backend.Containers import DragPoint
 from Backend.Containers import DisplayObject
 
@@ -275,7 +272,8 @@ class Registration:
                      "Success: {:b}, n_evals = {:d}\n"
                      .format(res.success, res.nfev) +
                      "scale={:.2f}, angle={:.2f}°, t=({:.1f}, {:.1f})"
-                     .format(res.x[0], res.x[1], res.x[2], res.x[3]))
+                     .format(res.x[0], res.x[1]*180.0/np.pi,
+                             res.x[2], res.x[3]))
 
         # Transform and display warped/fixed image
         # Allocate new display Object(s) for this purpose
@@ -325,6 +323,33 @@ class Registration:
 
         self.ImageOnFusion = True
 
+    # def ImageTransform2(self, Img, params):
+    #     """
+    #     Function for similarity transform of given input Image
+    #     Input:
+    #         Img: nd-array
+    #         params: vector (length 4) with transformation parameters
+    #             r (scaling factor), angle (rotation angle) t_1 and t_2
+    #             (translation vector)
+    #     Returns:
+    #         nd-Image array
+    #     """
+    #     rows, cols = np.shape(Img)[0], np.shape(Img)[1]
+    #     output = np.zeros((rows, cols))
+
+    #     r, alpha, t1, t2 = params
+    #     A = np.array([[np.cos(alpha), np.sin(alpha)],
+    #                   [np.sin(alpha), np.cos(alpha)]])
+    #     A_inv = (1/r) * np.linalg.inv(A)
+    #     for i in range(rows):
+    #         for j in range(cols):
+    #             r = np.dot(A_inv, np.array([i, j]) - np.array([t1, t2]))
+    #             try:
+    #                 output[int(r[0] + 0.5), int(r[1] + 0.5)] = Img[i, j]
+    #             except Exception:
+    #                 pass
+    #     return output
+
     def ImageTransform(self, Img, params):
         """
         Function for similarity transform of given input Image
@@ -339,8 +364,10 @@ class Registration:
 
         rows, cols = np.shape(Img)[0], np.shape(Img)[1]
         r, alpha, t1, t2 = params
-        alpha = alpha/(np.pi)  # convert to degree
-        A = cv2.getRotationMatrix2D((cols/2, rows/2), alpha, 1)
+        alpha = - alpha*180/(np.pi)  # convert to degree
+        A = cv2.getRotationMatrix2D((0, 0), alpha, 1.0)
+        # A[0][2] = t1
+        # A[1][2] = t2
         T = np.float32([[1.0, 0.0, t1], [0.0, 1.0, t2]])
 
         Img = cv2.warpAffine(Img, A, (cols, rows))
