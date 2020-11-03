@@ -6,16 +6,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>634</width>
-    <height>475</height>
+    <width>787</width>
+    <height>539</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Landmark Definition</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0" rowspan="2">
      <widget class="matplotlibWidget" name="Display_Landmarks" native="true">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
@@ -26,6 +26,31 @@
      </widget>
     </item>
     <item row="0" column="1">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title">
+       <string>GroupBox</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <widget class="QPushButton" name="Button_LoadLandmark">
+         <property name="text">
+          <string>Load Landmark Image</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QTextBrowser" name="Text_Filename"/>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="1" column="1">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QGroupBox" name="groupBox_autodetect">
@@ -152,7 +177,7 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <double>400.000000000000000</double>
+            <double>10000.000000000000000</double>
            </property>
            <property name="singleStep">
             <double>0.100000000000000</double>
@@ -172,7 +197,7 @@
             <number>1</number>
            </property>
            <property name="maximum">
-            <double>400.000000000000000</double>
+            <double>10000.000000000000000</double>
            </property>
            <property name="singleStep">
             <double>0.100000000000000</double>
@@ -211,8 +236,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>634</width>
-     <height>21</height>
+     <width>787</width>
+     <height>26</height>
     </rect>
    </property>
   </widget>

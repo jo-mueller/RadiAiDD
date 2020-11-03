@@ -63,89 +63,6 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QGroupBox" name="groupBox_4">
-         <property name="title">
-          <string>Field Limits</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0" colspan="2">
-           <widget class="QPushButton" name="Button_GetField">
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Detect Field edges</string>
-            </property>
-            <property name="default">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" colspan="3">
-           <widget class="QPushButton" name="Button_SetFieldLimits">
-            <property name="text">
-             <string>Lock</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>Field Limits: x = [</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="x_Left"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLabel" name="label_17">
-            <property name="text">
-             <string>;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QLineEdit" name="x_Right"/>
-          </item>
-          <item row="1" column="4">
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>]</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_16">
-            <property name="text">
-             <string>                    y = [</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="y_bottom"/>
-          </item>
-          <item row="2" column="2">
-           <widget class="QLabel" name="label_19">
-            <property name="text">
-             <string>;</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QLineEdit" name="y_top"/>
-          </item>
-          <item row="2" column="4">
-           <widget class="QLabel" name="label_20">
-            <property name="text">
-             <string>]</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="1">
         <widget class="QGroupBox" name="groupBox_2">
          <property name="title">
           <string>IsoCenter</string>
@@ -158,6 +75,12 @@
             </property>
             <property name="text">
              <string>Detect (Draw ROI)</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
             <property name="default">
              <bool>true</bool>
@@ -192,7 +115,7 @@
                <number>1</number>
               </property>
               <property name="maximum">
-               <double>300.000000000000000</double>
+               <double>10000.000000000000000</double>
               </property>
               <property name="singleStep">
                <double>0.100000000000000</double>
@@ -215,7 +138,7 @@
                <number>1</number>
               </property>
               <property name="maximum">
-               <double>300.000000000000000</double>
+               <double>10000.000000000000000</double>
               </property>
               <property name="singleStep">
                <double>0.100000000000000</double>
@@ -227,7 +150,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="0" rowspan="7">
+       <item row="0" column="0" rowspan="6">
         <widget class="matplotlibWidget" name="Display_IsoCenter" native="true">
          <property name="minimumSize">
           <size>
@@ -237,7 +160,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="3" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -250,7 +173,7 @@
          </property>
         </spacer>
        </item>
-       <item row="3" column="1">
+       <item row="2" column="1">
         <widget class="QPushButton" name="Button_Done">
          <property name="enabled">
           <bool>true</bool>
@@ -277,7 +200,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>
