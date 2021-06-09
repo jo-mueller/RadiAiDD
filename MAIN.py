@@ -3,7 +3,6 @@
 from Backend.Containers import RTstruct
 from Backend.Containers import OverlayImage
 from Backend.Containers import Check
-from Backend.Containers import GrayWindow
 from Backend.Containers import Crosshair
 
 from Backend.Children import IsoCenter_Child as IsoCenter
