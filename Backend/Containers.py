@@ -13,6 +13,7 @@ from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QFileDialog as Qfile
+from PyQt5.QtWidgets import QToolBar
 
 import numpy as np
 import pydicom as dicom
@@ -27,6 +28,7 @@ import matplotlib.patches as patches
 
 class Signals(QObject):
     moving = pyqtSignal()
+    changing_clims = pyqtSignal([float, float])
 
 
 class DragPoint(QWidget):
@@ -476,8 +478,10 @@ class OverlayImage(QObject):
         self.y_shift = 0
 
 
-class DisplayObject:
+class DisplayObject(QWidget):
     def __init__(self, canvas, label, GrayControl=None, **kwargs):
+        super().__init__()
+        
         self.canvas = canvas
         self.Qlabel = label
 
@@ -485,13 +489,24 @@ class DisplayObject:
         self.overlay = None
         self.handle = None
         self.GC = None  # No graywindow control assigned by default
+        self.GBWidget = None  # No Graybar assigned by default
 
         self.GUI = self.getGUI()
         self.overlay = None  # storage for overlay image array
         self.has_overlay = False  # Flag that tells whether image has overlay
         self.overlay_active = False  # Flag that tells if overlay is active
+        
+        self.CCenter = 0  # center for gray range
+        self.CRange = 0  # range of displayed gray values
+        self.n_bins = None  # n bins for graybar
+        
+        # flags
+        self.is_moving = False
+        self.has_graybar = False
+        self.clim_changed = Signals.changing_clims
+        
 
-    def load_Image(self):
+    def load_Image(self, ImgType='RG', **kwargs):
         """
         Rule: Image is loaded and fliped upside down so that the display
         option origin=lower will result in correct display.
@@ -499,6 +514,9 @@ class DisplayObject:
         additional layer vontaining only the overlayed brain mask),
         then one additional layer is stored in here - only one!
         """
+        
+        self.n_bins = kwargs.get('n_bins', 100)
+        
         fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
                                          "", "(*.tif)")
         # If no file is chosen:
@@ -506,7 +524,13 @@ class DisplayObject:
             return 0
 
         data = tifffile.imread(fname)
+        
+        # if ImgType == 'RG:'
+        #     # do N2V
+        
         data = self.normalize(data, 256.0)
+        
+        # If image has more than two layers (i.e. = 3D):
         if len(data.shape) > 2:
             self.overlay = np.flipud(data[1, :, :]).astype(float)
             self.overlay[self.overlay == 0] = np.nan
@@ -515,18 +539,49 @@ class DisplayObject:
         else:
             self.array = np.flipud(data)
 
-        # zero padding
-        if self.has_overlay:
-            self.array = self.zeropadding(self.array, 1032, 1012)
-            self.overlay = self.zeropadding(self.overlay, 1032, 1012)
-        else:
-            self.array = self.zeropadding(self.array, 1032, 1012)
+        self.hist = np.histogram(self.array, self.n_bins)  # get hist of image
+        # # zero padding
+        # if self.has_overlay:
+        #     self.array = self.zeropadding(self.array, 1032, 1012)
+        #     self.overlay = self.zeropadding(self.overlay, 1032, 1012)
+        # else:
+        #     self.array = self.zeropadding(self.array, 1032, 1012)
 
         self.handle = self.display(cmap='gray')
         self.Qlabel.setText(fname)
 
-        logging.info('Successfully imported {:s}'.format(fname))
-        self.GUI.WindowSelector.setEnabled(True)
+        # logging.info('Successfully imported {:s}'.format(fname))
+        # self.GUI.WindowSelector.setEnabled(True)
+        
+        # get initial gray-range
+        clims = self.canvas.axes.images[0].get_clim()
+        self.CCenter = np.mean(clims)
+        self.CRange = np.diff(clims)
+        
+        if self.has_graybar:
+            self.GBWidget.canvas.axes.clear()
+            self.GBWidget.canvas.axes.set_facecolor("#323232")
+            self.GBWidget.canvas.axes.set_yticks([])
+            self.GBWidget.canvas.axes.set_xticks([])
+            self.GBWidget.canvas.axes.bar(self.hist[1][1:], self.hist[0],
+                                          width=np.diff(self.hist[1])[0])
+            self.GBWidget.canvas.draw()
+            
+        # Prevent double connection when new image is loaded
+        try:
+            self.canvas.mpl_disconnect(self.cidpress)
+            self.canvas.mpl_disconnect(self.cidrelease)
+            self.canvas.mpl_disconnect(self.cidmotion)
+        except Exception:
+            pass
+        
+        # Connect mouse movement buttons
+        self.cidpress = self.canvas.mpl_connect(
+            'button_press_event', self.on_press)
+        self.cidrelease = self.canvas.mpl_connect(
+            'button_release_event', self.on_release)
+        self.cidmotion = self.canvas.mpl_connect(
+            'motion_notify_event', self.on_motion)
 
     def normalize(self, data, N):
         return N*(data - np.min(data))/(np.max(data) - np.min(data))
@@ -547,13 +602,72 @@ class DisplayObject:
         Display function to paint array in self on canvas.
         By default removes previous image on this canvas.
         """
+        
+        ax_onoff = kwargs.get('ax_onoff', 'off')
+        
         if clear:
             self.canvas.axes.clear()
+        self.canvas.axes.axis(ax_onoff)
         handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
         self.handle = handle
         self.canvas.draw()
         self.is_active = True
         return handle
+
+    def on_press(self, event):
+        """
+        Handles response of canvas to click of middle mouse button
+        """
+        
+        # 1 = left click, 2 = middle click, 3 = right click
+        if event.button == 2:
+            self.press = event.xdata, event.ydata
+            self.is_moving = True            
+            
+    def on_motion(self, event):
+        """
+        When middle-clicked mouse is moved
+        """
+        if self.is_moving:
+            try:  # catch error that occurs when mouse goes outside plot
+                xpress, ypress = self.press
+                dx = event.xdata - xpress
+                dy = event.ydata - ypress
+                
+                cntr = self.CCenter + dx * (50/self.array.shape[0])
+                rng = self.CRange + dy * (50/self.array.shape[1])
+                
+                if self.CRange < 0: 
+                    self.CRange = 1
+                    
+                if self.CCenter < 0:
+                    self.CCenter = 0
+                    
+                if self.CCenter > 256:
+                    self.CCenter = 256
+    
+                self.set_clim(cntr=cntr, rng=rng)
+                
+                if self.has_graybar:
+                    self.update_graybar(cntr=cntr, rng=rng)
+            except Exception:
+                pass
+            
+    def on_release(self, event):
+        """
+        When middle-clicked mouse is release
+        """
+        
+        if self.is_moving:
+            xpress, ypress = self.press
+            dx = event.xdata - xpress
+            dy = event.ydata - ypress
+            
+            self.CCenter += dx * (50/self.array.shape[0])
+            self.CRange += dy * (50/self.array.shape[1])
+            
+            self.is_moving = False
+        
 
     def toggleOverlay(self):
         'Switches the overlay on and off, provided it exists'
@@ -571,8 +685,11 @@ class DisplayObject:
             self.canvas.draw()
             self.overlay_active = True
 
-    def set_clim(self, cntr, rng):
+    def set_clim(self, **kwargs):
         "Adjuts graywindow of self object if displayed"
+
+        cntr = kwargs.get('cntr', self.CCenter)
+        rng = kwargs.get('rng', self.CRange)
 
         # CHeck if array has already been provided
         if self.handle is None:
@@ -597,191 +714,24 @@ class DisplayObject:
             widget = widget.parentWidget()
             if widget.parentWidget() is None:
                 return widget
-
-    def assign_graycontrol(self, HistCanv, SliderCenter, SliderRange,
-                           TxtCtr, TxtRng):
-        "Assigns a graywindow control instince for this display object"
-        self.GC = GrayWindow2(HistCanv, SliderCenter, SliderRange,
-                              TxtCtr, TxtRng, self)
-
-
-class GrayWindow2:
-    def __init__(self, HistCanv, SliderCenter, SliderRange,
-                 TxtCtr, TxtRng, owner):
-        self.owner = owner
-        self.SliderCenter = SliderCenter
-        self.SliderRange = SliderRange
-
-        self.TextCenter = TxtCtr
-        self.TextRange = TxtRng
-        self.histcanvas = HistCanv
-
-        self.is_active = False
-        self.histcolor = 'blue'
-        self.is_filled = False
-
-        # defaults for histogram
-        self.clim = [0, 100]
-        self.center = 0
-        self.range = 0
-        self.hist = [[0], [0]]
-        self.barwidth = 1
-        self.nbins = 150
-
-    def fill(self):
-        """
-            Fills the graywindow control with actual values
-        """
-
-        if self.owner.array is None:
-            return 0
-
-        # Include only non-zero data in the subsequent calculation
-        self.clim = self.owner.handle.get_clim()
-        self.range = np.diff(self.clim)
-        self.center = self.clim[0] + self.range/2.0
-
-        # Histogram
-        data = self.owner.array.flatten()
-        data = data[data != 0.0]
-        self.hist = np.histogram(data, self.nbins)
-        self.barwidth = np.mean(np.diff(self.hist[1]))
-        self.is_filled = True
-
-    def activate(self):
-        """
-        Activates control of sliders over parent's graywindowing and the
-        widgets that belong to this graywindow, such as a canvas for the
-        histogram and textfields for the window values
-        """
-
-        # When activated, check for input data
-        if not self.is_filled:
-            self.fill()
-
-        self.SliderCenter.setMinimum(self.clim[0])
-        self.SliderCenter.setMaximum(self.clim[1])
-        self.SliderRange.setMinimum(1)
-        self.SliderRange.setMaximum(np.diff(self.clim))
-        self.SliderCenter.setValue(self.center)
-        self.SliderRange.setValue(self.range)
-
-        self.TextCenter.setText("{:d}".format(int(self.center)))
-        self.TextRange.setText("{:d}".format(int(self.range)))
-
-        self.SliderCenter.valueChanged.connect(self.update)
-        self.SliderRange.valueChanged.connect(self.update)
-        self.is_active = True
-
-        self.histcanvas.axes.clear()
-        self.histcanvas.axes.bar(self.hist[1][:-1], height=self.hist[0],
-                                 color=self.histcolor, width=self.barwidth)
-        self.histcanvas.draw()
-        self.update()
-
-    def deactivate(self):
-        try:
-            self.SliderCenter.disconnect()
-        except Exception:
-            pass
-        try:
-            self.SliderRange.disconnect()
-        except Exception:
-            pass
-
-    def update(self):
-        "Function that is used to update the plot in respective canvas"
-
-        self.center = self.SliderCenter.value()
-        self.range = self.SliderRange.value()
-
-        self.TextCenter.setText("{:d}".format(int(self.center)))
-        self.TextRange.setText("{:d}".format(int(self.range)))
-
-        self.owner.set_clim(self.center, self.range)
-        self.histcanvas.axes.set_xlim([self.center - self.range/2,
-                                       self.center + self.range/2])
-        self.histcanvas.axes.set_ylim([0, np.max(self.hist[0])])
-        self.histcanvas.draw()
-
-
-class GrayWindow(QObject):
-    """
-    SliderCenter, SliderRange, TextCenter, TextRange, canvas, histcanvas, data
-    Class that is used to adjust GrayWindow of Planar Scans
-    (DEPRECATED)
-    """
-
-    def __init__(self, SliderCenter, SliderRange,
-                 TextCenter, TextRange, canvas, histcanvas, data):
-
-        QObject.__init__(self)
-        self.SliderCenter = SliderCenter
-        self.SliderRange = SliderRange
-
-        self.TextCenter = TextCenter
-        self.TextRange = TextRange
-        self.canvas = canvas
-        self.histcanvas = histcanvas
-
-        self.cmin = np.min(data)
-        self.cmax = np.max(data)
-
-        center = (self.cmax-self.cmin)/2.0
-
-        self.SliderCenter.setMinimum(self.cmin)
-        self.SliderCenter.setMaximum(self.cmax)
-        self.SliderRange.setMinimum(0)
-        self.SliderRange.setMaximum(center*2)
-
-        # set default greyvalues only when text labels display zero.
-        # Else, the slider has probably already been used and it is desirable
-        # to keep the previously set grey setting
-        if self.SliderCenter.value() == 0 and self.SliderCenter.value() == 0:
-            self.SliderCenter.setValue(350)
-            self.SliderRange.setValue(200)
-            self.TextCenter.setText(str(int(350)))
-            self.TextRange.setText(str(int(200)))
-
-        # plot histogram upon initialization
-        data = data.flatten()
-        data = data[data > 0]  # remove all zeroes from datavector
-        self.histcanvas.axes.clear()
-        self.histcanvas.axes.hist(data, 200)
-        self.histcanvas.draw()
-        self.maxfreq = np.max(np.histogram(data, 200)[0])
-
-        self.SliderCenter.valueChanged.connect(self.update)
-        self.SliderRange.valueChanged.connect(self.update)
-
-        self.update()
-
-    def update(self):
-        "Function that is used to update the plot in respective canvas"
-        print("update")
-        Center = self.SliderCenter.value()
-        Range = self.SliderRange.value()
-
-        self.TextCenter.setText(str(int(Center)))
-        self.TextRange.setText(str(int(Range)))
-
-        axes = self.canvas.axes
-        for im in axes.get_images():
-            im.set_clim(Center - Range/2, Center + Range/2)
-        self.canvas.draw()
-        self.histcanvas.axes.set_xlim([Center - Range/2, Center + Range/2])
-        self.histcanvas.axes.set_ylim([0, self.maxfreq])
-        self.histcanvas.draw()
         
-    def disconnect(self):
-        try:
-            self.SliderCenter.valueChanged.disconnect()
-        except Exception:
-            pass
-        try:
-            self.SliderCenter.valueChanged.disconnect()
-        except Exception:
-            pass
+    def assign_graybar(self, GBwidget):
+        self.GBWidget = GBwidget
+        self.GBWidget.canvas.axes.axis('off')
+        self.GBWidget.findChild(QToolBar).setVisible(False)
+        self.GBWidget.canvas.axes.figure.tight_layout()
+        
+        self.has_graybar = True
+    
+    def update_graybar(self, **kwargs):
+        cntr = kwargs.get('cntr', self.CCenter)  # adjust graybar center
+        rng = kwargs.get('rng', self.CRange)  # and range
+        
+        self.GBWidget.canvas.axes.set_xlim([cntr - rng/2, cntr + rng/2])
+        # self.GBWidget.canvas.axes.figure.tight_layout()
+        self.GBWidget.canvas.draw()
+
+
 
 
 class Check:
