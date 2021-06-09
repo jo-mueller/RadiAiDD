@@ -35,6 +35,7 @@ from PyQt5.QtCore import QThreadPool
 from PyQt5.QtCore import QRunnable
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import pyqtRemoveInputHook, pyqtRestoreInputHook
 from PyQt5.QtWidgets import QFileDialog as Qfile
 from PyQt5.QtWidgets import QMainWindow as QMain
 #    from PyQt5.QtWidgets import QWidget as QWid
@@ -320,8 +321,8 @@ class Signals(QObject):
     travelling = pyqtSignal(np.ndarray)
     arrived = pyqtSignal()
     calibrated = pyqtSignal(bool)
-    State = pyqtSignal(np.ndarray)
-
+    State = pyqtSignal(object)
+        
 
 class StatusWatchdog(QRunnable):
     """This thread is continuosly running in the background of the GUI and
@@ -337,7 +338,7 @@ class StatusWatchdog(QRunnable):
         self._isRunning = True
         self._pause = False
 
-        # shortcut to Bus IDs
+        # # shortcut to Bus IDs
         self.MID = Motor.MasterID
         self.SID = Motor.SlaveID
 
@@ -346,12 +347,12 @@ class StatusWatchdog(QRunnable):
         self.StatusAll[:] = False
         self.Signal = Signals()
 
-        logging.debug('Table Status WatchDog initialized')
+        # logging.debug('Table Status WatchDog initialized')
 
     @pyqtSlot()
     def run(self):
 
-        logging.info('Table Status WatchDog awake')
+        # logging.info('Table Status WatchDog awake')
         # am I running?
         if not self._isRunning:
             self._isRunning = True
@@ -392,6 +393,7 @@ class StatusWatchdog(QRunnable):
                 self.StatusAll[2] = False
 
             # Emit collected values
+            # self.Signal.State.emit('Growl')
             self.Signal.State.emit(self.StatusAll)
             time.sleep(5) # sleep 5 seconds
 
@@ -434,7 +436,7 @@ class MovementSupervisor(QRunnable):
         - mode: if mode is not normal, then it's probably a reference run
         """
 
-        logging.debug('Table is moving: Movement WatchDog awake')
+        # logging.debug('Table is moving: Movement WatchDog awake')
         # is the thread currently running? Not sure if this is necessary
         if not self._isRunning:
             self._isRunning = True
@@ -459,7 +461,7 @@ class MovementSupervisor(QRunnable):
                 self.Signal.travelling.emit(self.pos)
                 time.sleep(.5)  # wait +1 second until WatchDog is let off the leash
                 self.Signal.arrived.emit()
-                logging.debug('Destination reached: Movement WatchDog asleep')
+                # logging.debug('Destination reached: Movement WatchDog asleep')
                 self._isRunning = False
                 break
 
@@ -684,13 +686,13 @@ class MotorControl(object):
         GUI.TablePosX.setText(str(pos[0]))
         GUI.TablePosY.setText(str(pos[1]))
 
-    # Initialization
+
     def InitMotor(self):
         """
         function that executes everything that is necessary to initialize
         the motor
         """
-
+        
         # Before first: Pause Status WatchDog
         self.StatusWatchDog.Pause()
 
@@ -701,7 +703,7 @@ class MotorControl(object):
         # disable boxes for port selection and connect button
         if self.COMstate.state:
             logging.info('Port {:s} ready for serial communication.'
-                         .format(port))
+                          .format(port))
             GUI.QComboBox_ListOfPorts.setEnabled(False)
             GUI.Button_MotorInit.setEnabled(False)
         else:
@@ -710,6 +712,9 @@ class MotorControl(object):
 
         # Find Slaves
         self.find_slaves(10)
+        
+        print(self.MasterID)
+        print(self.SlaveID)
 
         # Next: set all motorvalues
         self.config_motor(self.MasterID)
@@ -818,7 +823,7 @@ class MotorControl(object):
         config = configparser.RawConfigParser()
         config.read(filename)
 
-        logging.debug('Configuring Motor Parameters for Slave ID {:s}'.format(slaveID))
+        logging.debug('Configuring Motor Parameters for Slave ID {:d}'.format(slaveID))
 
         #write values to axis
         self.serial_write(slaveID, 1, 'SMK',       config.get('MOTOR', 'SMK'))
