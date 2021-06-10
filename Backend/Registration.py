@@ -8,8 +8,11 @@ import logging
 import numpy as np
 import cv2
 import os
+import tifffile as ti               # tiff file commands
 
 from PyQt5.QtWidgets import QPushButton
+
+from PyQt5.QtWidgets import QToolBar
 
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
@@ -41,17 +44,35 @@ class Registration:
         self.WarpedFixed = DisplayObject(self.GUI.Display_Fusion.canvas,
                                          None)
 
+        # Assign Graywindow controls
+        hc = self.GUI.ActPos_GreyWindow_Hist.canvas
+        cntr = self.GUI.ActPos_Slider_Center
+        rng = self.GUI.ActPos_SliderRange
+        txtcntr = self.GUI.ActPos_Label_Center_Alignment
+        txtrng = self.GUI.ActPos_Label_Range_Alignment
 
-        # graybar
-        self.Moving.assign_graybar(self.GUI.Graybar_Moving)
-        self.Fixed.assign_graybar(self.GUI.Graybar_Fixed)
+        self.Moving.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.Fixed.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.WarpedMoving.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
+        self.WarpedFixed.assign_graycontrol(hc, cntr, rng, txtcntr, txtrng)
 
+        self.Fixed.GC.histcolor = 'blue'
+        self.Moving.GC.histcolor = 'orange'
+        self.WarpedFixed.GC.histcolor = None
+        self.WarpedMoving.GC.histcolor = None
 
-        self.GUI.Button_load_moving.clicked.connect(lambda: self.Moving.load_Image(ImgType="XR"))
-        self.GUI.Button_load_fixed.clicked.connect(lambda: self.Fixed.load_Image(ImgType="RG"))
+        self.GUI.Button_load_moving.clicked.connect(lambda: self.Moving.load_Image(ImgType='XRay'))
+        self.GUI.Button_load_fixed.clicked.connect(lambda: self.Fixed.load_Image(ImgType='RG'))
+
+        # Allocate connections for grayvalue control
+        self.GUI.WindowSelector.addItem("")
+        self.GUI.WindowSelector.addItem("Moving image (X-Ray)")
+        self.GUI.WindowSelector.addItem("Target image (Radiography)")
+        self.GUI.WindowSelector.currentIndexChanged.connect(self.greyscale)
+        self.GUI.ActPos_GreyWindow_Hist.findChild(QToolBar).setVisible(False)
 
         # Control for overlay function
-        # self.GUI.Button_toggleOverlay.clicked.connect(self.toggleOverlay)
+        self.GUI.Button_toggleOverlay.clicked.connect(self.toggleOverlay)
 
         # Buttons for default marker positions
         self.GUI.Button_default_moving.clicked.connect(
@@ -115,6 +136,26 @@ class Registration:
         if self.WarpedMoving.overlay_active != self.Moving.overlay_active:
             self.WarpedMoving.toggleOverlay()
 
+    def greyscale(self):
+        'Assigns the image controls to the chosen display if required.'
+
+        # Try to disconnect upon connecting again
+        self.Moving.GC.deactivate()
+        self.Fixed.GC.deactivate()
+        self.WarpedFixed.GC.deactivate()
+        self.WarpedMoving.GC.deactivate()
+
+        if self.GUI.WindowSelector.currentIndex() == 1:
+            self.Moving.GC.activate()
+            if self.ImageOnFusion:
+                self.WarpedMoving.GC.activate()
+
+        elif self.GUI.WindowSelector.currentIndex() == 2:
+            self.Fixed.GC.activate()
+            if self.ImageOnFusion:
+                self.WarpedFixed.GC.activate()
+        else:
+            return 0
 
     def calcMotor(self):
         'Calculates Motor target coordinates'
@@ -246,6 +287,9 @@ class Registration:
 
         self.WarpedMoving.display(alpha=0.5, interpolation='nearest',
                                   cmap='gray')
+        # save 
+        
+        ti.imsave('C:/Users/Acer/Documents/Studium/MA/reconstruction_xray_radio/'+'WarpedMoving.tif', self.WarpedMoving.display)
         self.WarpedFixed.display(alpha=0.5, clear=False,
                                  interpolation='nearest', cmap='gray')
 
@@ -338,7 +382,7 @@ class Registration:
 
     def adjust_alpha(self):
         """
-        Adjust the alpha values of the fixed/warped image overlay.
+            Adjust the alpha values of the fixed/warped image overlay.
         """
         # get alpha value from Slider
         alpha = float(self.GUI.Slider_RegOverlay.value()/100.0)
