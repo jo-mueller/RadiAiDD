@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QFileDialog as Qfile
 from PyQt5.QtWidgets import QToolBar
+from PyQt5.QtWidgets import QLabel
 
 import numpy as np
 import pydicom as dicom
@@ -25,10 +26,61 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
 import matplotlib.patches as patches
 
-
 class Signals(QObject):
     moving = pyqtSignal()
     changing_clims = pyqtSignal([float, float])
+    state_changed = pyqtSignal(bool)
+    state_down = pyqtSignal()
+    state_up = pyqtSignal()
+
+
+class StateSign:
+    def __init__(self, HostFrame, TextStates):
+        """
+        var QObj: text label object for status display
+        var TextStates: array (len 2) with labels for display in treu/false state
+        """
+
+        # QFrame hosts the label for the state sign
+        self.QFrame = HostFrame
+        
+        # find the Qlabel object in host box
+        for obj in self.QFrame.children():
+            if type(obj) ==  QLabel:
+                self.QText = obj
+        
+        # write passed state to dictionary
+        self.dict_states = dict()
+        self.dict_states['off'] = TextStates[0]
+        self.dict_states['on'] = TextStates[1]
+        
+        # define signal
+        self.Signals = Signals()
+        
+        # init default state
+        self.state = False
+        self.flag_down()
+        
+
+    def flag_down(self):
+        self.QText.setText(self.dict_states['off'])
+        self.QFrame.setStyleSheet( "background-color: #DF362D;")
+        self.state = False
+        self.Signals.state_down.emit()
+
+    def flag_up(self):
+        self.QText.setText(self.dict_states['on'])
+        self.QFrame.setStyleSheet( "background-color: #18A558;")
+        self.state = True
+        self.Signals.state_up.emit()
+
+    def toggle(self):
+        "changes the state from one to another"
+        if self.state == True:
+            self.flag_down()
+        else:
+            self.flag_up()
+        self.Signals.state_changed.emit(self.state)
 
 
 class DragPoint(QWidget):
@@ -479,12 +531,16 @@ class OverlayImage(QObject):
 
 
 class DisplayObject(QWidget):
+    """
+    Host class for display of images, array storage, etc.
+    """
     def __init__(self, canvas, label, GrayControl=None, **kwargs):
         super().__init__()
         
         self.canvas = canvas
         self.Qlabel = label
 
+        self.ImgType = None
         self.array = None
         self.overlay = None
         self.handle = None
@@ -503,7 +559,35 @@ class DisplayObject(QWidget):
         # flags
         self.is_moving = False
         self.has_graybar = False
-        self.clim_changed = Signals.changing_clims
+        self.Signals = Signals()
+        
+    def wipe(self):
+        """
+        Cleans image object and removes all references
+        """
+        
+        # clear image
+        self.canvas.axes.clear()
+        self.canvas.draw()
+        
+        # destroy data handles
+        self.ImgType = None
+        self.array = None
+        self.overlay = None
+        self.handle = None
+        
+        # destroy connection to statesign
+        if self.ImgType == 'XR':
+            self.GUI.PlanImageState.state_down.disconnect(self.wipe)
+        elif self.ImgType == 'RG':
+            self.GUI.TreatImageState.state_down.discconnect(self.wipe)
+        
+        # destroy file reference
+        self.Qlabel.setText('')
+        
+        if self.has_graybar:
+            self.GBWidget.canvas.axes.clear()
+            self.GBWidget.canvas.draw()
         
 
     def load_Image(self, ImgType='RG', **kwargs):
@@ -515,19 +599,15 @@ class DisplayObject(QWidget):
         then one additional layer is stored in here - only one!
         """
         
-        self.n_bins = kwargs.get('n_bins', 100)
+        self.ImgType = ImgType
         
+        self.n_bins = kwargs.get('n_bins', 100)
         fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
                                          "", "(*.tif)")
         # If no file is chosen:
         if not fname:
             return 0
-
         data = tifffile.imread(fname)
-        
-        # if ImgType == 'RG:'
-        #     # do N2V
-        
         data = self.normalize(data, 256.0)
         
         # If image has more than two layers (i.e. = 3D):
@@ -540,17 +620,10 @@ class DisplayObject(QWidget):
             self.array = np.flipud(data)
 
         self.hist = np.histogram(self.array, self.n_bins)  # get hist of image
-        # # zero padding
-        # if self.has_overlay:
-        #     self.array = self.zeropadding(self.array, 1032, 1012)
-        #     self.overlay = self.zeropadding(self.overlay, 1032, 1012)
-        # else:
-        #     self.array = self.zeropadding(self.array, 1032, 1012)
-
         self.handle = self.display(cmap='gray')
         self.Qlabel.setText(fname)
 
-        # logging.info('Successfully imported {:s}'.format(fname))
+        logging.info('Successfully imported {:s}'.format(fname))
         # self.GUI.WindowSelector.setEnabled(True)
         
         # get initial gray-range
@@ -569,12 +642,42 @@ class DisplayObject(QWidget):
             
         # Prevent double connection when new image is loaded
         try:
-            self.canvas.mpl_disconnect(self.cidpress)
-            self.canvas.mpl_disconnect(self.cidrelease)
-            self.canvas.mpl_disconnect(self.cidmotion)
+            self.disconnect()
         except Exception:
             pass
+        self.connect()
         
+        # Send state to Workflow
+        if ImgType == 'XR':
+            self.GUI.PlanImageState.flag_up()
+            self.GUI.PlanImageState.Signals.state_down.connect(self.wipe)
+        elif ImgType == 'RG':
+            self.GUI.TreatImageState.flag_up()
+            self.GUI.TreatImageState.Signals.state_down.connect(self.wipe)
+        
+        
+    def proc_on_import(self, **kwargs):
+        """
+        Does some processing of the image upon import
+        """
+        
+        do_zeropadding = kwargs.get('zeropadding', False)
+        do_N2V_filtering = kwargs.get('N2V', False)
+        
+        # zero padding
+        if do_zeropadding:
+            if self.has_overlay:
+                self.array = self.zeropadding(self.array, 1032, 1012)
+                self.overlay = self.zeropadding(self.overlay, 1032, 1012)
+            else:
+                self.array = self.zeropadding(self.array, 1032, 1012)
+    
+    def disconnect(self):
+        self.canvas.mpl_disconnect(self.cidpress)
+        self.canvas.mpl_disconnect(self.cidrelease)
+        self.canvas.mpl_disconnect(self.cidmotion)
+
+    def connect(self):
         # Connect mouse movement buttons
         self.cidpress = self.canvas.mpl_connect(
             'button_press_event', self.on_press)
@@ -646,8 +749,9 @@ class DisplayObject(QWidget):
                 if self.CCenter > 256:
                     self.CCenter = 256
     
+                # update colorlimits
                 self.set_clim(cntr=cntr, rng=rng)
-                
+                self.Signals.changing_clims.emit(cntr, rng)
                 if self.has_graybar:
                     self.update_graybar(cntr=cntr, rng=rng)
             except Exception:
@@ -659,15 +763,17 @@ class DisplayObject(QWidget):
         """
         
         if self.is_moving:
-            xpress, ypress = self.press
-            dx = event.xdata - xpress
-            dy = event.ydata - ypress
-            
-            self.CCenter += dx * (50/self.array.shape[0])
-            self.CRange += dy * (50/self.array.shape[1])
-            
+            try:
+                xpress, ypress = self.press
+                dx = event.xdata - xpress
+                dy = event.ydata - ypress
+                
+                self.CCenter += dx * (50/self.array.shape[0])
+                self.CRange += dy * (50/self.array.shape[1])
+                
+            except Exception:
+                pass
             self.is_moving = False
-        
 
     def toggleOverlay(self):
         'Switches the overlay on and off, provided it exists'
@@ -697,6 +803,7 @@ class DisplayObject(QWidget):
 
         self.handle.set_clim(cntr - rng/2, cntr + rng/2)
         self.canvas.draw()
+        
         return 1
 
     def get_array(self):
@@ -720,6 +827,7 @@ class DisplayObject(QWidget):
         self.GBWidget.canvas.axes.axis('off')
         self.GBWidget.findChild(QToolBar).setVisible(False)
         self.GBWidget.canvas.axes.figure.tight_layout()
+        self.GBWidget.canvas.draw()
         
         self.has_graybar = True
     

@@ -41,11 +41,9 @@ class Registration:
         self.WarpedFixed = DisplayObject(self.GUI.Display_Fusion.canvas,
                                          None)
 
-
         # graybar
         self.Moving.assign_graybar(self.GUI.Graybar_Moving)
         self.Fixed.assign_graybar(self.GUI.Graybar_Fixed)
-
 
         self.GUI.Button_load_moving.clicked.connect(lambda: self.Moving.load_Image(ImgType="XR"))
         self.GUI.Button_load_fixed.clicked.connect(lambda: self.Fixed.load_Image(ImgType="RG"))
@@ -59,8 +57,10 @@ class Registration:
         self.GUI.Button_default_fixed.clicked.connect(
             lambda: self.setDefaultPositions("fixed"))
 
-        # Buttons for registration execution
+        # Buttons for registration execution and acceptance
         self.GUI.Button_RunReg.clicked.connect(self.runRegistration)
+        self.GUI.Button_RunReg.clicked.connect(self.GUI.RegistrationState.flag_down)
+        self.GUI.Button_AccReg.clicked.connect(self.GUI.RegistrationState.flag_up)
 
         # Buttons for Motor stuff
         self.GUI.Btn_getCurrentMotor.clicked.connect(
@@ -73,17 +73,6 @@ class Registration:
         # List of landmarks and default coordinates
         self.LM_moving = []
         self.LM_fixed = []
-
-        self.default_moving = [[627, 489],
-                               [484, 473],
-                               [590, 498],
-                               [643, 438],
-                               [703, 443]]
-        self.default_fixed = [[603, 368],
-                              [336, 332],
-                              [502, 362],
-                              [607, 267],
-                              [704, 281]]
 
         # Flags
         self.PointsOnCanvas_moving = False
@@ -239,7 +228,15 @@ class Registration:
         # Allocate new display Object(s) for this purpose
         self.WarpedMoving.array = self.ImageTransform(self.Moving.array, res.x)
         self.WarpedFixed.array = self.Fixed.array
+        
+        # # disconnect previous links between Images and Warped Counterparts
+        # try:
+        #     self.Moving.Signals.changing_clims.disconnect(self.WarpedMoving.set_clim)
+        #     self.Fixed.Signals.changing_clims.disconnect(self.WarpedFixed.set_clim)
+        # except Exception:
+        #     pass
 
+        # If there's an overlay, transform this as well
         if self.Moving.has_overlay:
             self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x)
             self.WarpedMoving.has_overlay = True
@@ -265,7 +262,7 @@ class Registration:
             self.TrfTrgPoint = DragPoint(self.GUI.Display_Fusion,
                                          x=r[0], y=r[1],
                                          transparent=True, size=30/2.0*res.x[0])
-        except ValueError:
+        except Exception:
             pass
 
         # Display trafo params in text-label
@@ -282,33 +279,13 @@ class Registration:
             self.sliderconnected = True
 
         self.ImageOnFusion = True
+        
+        # # After registration, forward clim-change of input images to overlay
+        # self.Moving.Signals.changing_clims.connect(
+        #     lambda: self.WarpedMoving.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
+        # self.Fixed.Signals.changing_clims.connect(
+        #     lambda: self.WarpedFixed.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
 
-    # def ImageTransform2(self, Img, params):
-    #     """
-    #     Function for similarity transform of given input Image
-    #     Input:
-    #         Img: nd-array
-    #         params: vector (length 4) with transformation parameters
-    #             r (scaling factor), angle (rotation angle) t_1 and t_2
-    #             (translation vector)
-    #     Returns:
-    #         nd-Image array
-    #     """
-    #     rows, cols = np.shape(Img)[0], np.shape(Img)[1]
-    #     output = np.zeros((rows, cols))
-
-    #     r, alpha, t1, t2 = params
-    #     A = np.array([[np.cos(alpha), np.sin(alpha)],
-    #                   [np.sin(alpha), np.cos(alpha)]])
-    #     A_inv = (1/r) * np.linalg.inv(A)
-    #     for i in range(rows):
-    #         for j in range(cols):
-    #             r = np.dot(A_inv, np.array([i, j]) - np.array([t1, t2]))
-    #             try:
-    #                 output[int(r[0] + 0.5), int(r[1] + 0.5)] = Img[i, j]
-    #             except Exception:
-    #                 pass
-    #     return output
 
     def ImageTransform(self, Img, params):
         """
@@ -321,7 +298,8 @@ class Registration:
         Returns:
             nd-Image array
         """
-
+        
+    
         rows, cols = np.shape(Img)[0], np.shape(Img)[1]
         r, alpha, t1, t2 = params
         alpha = - alpha*180/(np.pi)  # convert to degree
@@ -385,9 +363,29 @@ class Registration:
         return np.sqrt(np.sum(np.power(np.subtract(x1, x2), 2)))
 
     def setDefaultPositions(self, which):
-        # ______
-        # MOVING
-        # ______
+        
+        """
+        Draw some default registration markers on the canvas
+        """
+        
+        # First check if there is an image to begin with
+        if which == "moving":
+            if self.Moving.array is None:
+                return 0
+            else:
+                x0, y0 = self.Moving.array.shape[0]//2, self.Moving.array.shape[1]//2
+                self.default_moving = [[x0 + x0/10*np.cos(x),
+                                        y0 + y0/10*np.sin(x)] for x in range(5)]
+            
+        elif which == 'fixed':
+            if self.Fixed.array is None:
+                return 0
+            else:
+                x0, y0 = self.Fixed.array.shape[0]//2, self.Fixed.array.shape[1]//2
+                self.default_fixed = [[x0 + x0/10*np.cos(x),
+                                       y0 + y0/10*np.sin(x)] for x in range(5)]  
+
+        # process calls to markers on moving image
         if which == "moving":
             QObj = self.GUI.Display_Moving
 
@@ -409,9 +407,7 @@ class Registration:
                 self.LM_moving.append(point)
             self.PointsOnCanvas_moving = True
 
-        # ______
-        # FIXED
-        # ______
+    # process calls to markers on fixed image
         elif which == "fixed":
             QObj = self.GUI.Display_Fixed
 
