@@ -250,40 +250,40 @@ class RadiographyImage(object):
         self.pw = pw
 
 
-class RTstruct:
-    """Class that holds everything that is necessary
-    for the handling of RT structure sets in this application
-    """
+# class RTstruct:
+#     """Class that holds everything that is necessary
+#     for the handling of RT structure sets in this application
+#     """
 
-    def __init__(self):
-        self.filename = []
-        self.PatientID = []
+#     def __init__(self):
+#         self.filename = []
+#         self.PatientID = []
 
-    def load(self, fullpath):
-        "Function to load all necessary info from RTstruct metadata"
-        metadata = dicom.read_file(fullpath)
+#     def load(self, fullpath):
+#         "Function to load all necessary info from RTstruct metadata"
+#         metadata = dicom.read_file(fullpath)
 
-        self.filename = fullpath
-        self.PatientID = metadata.PatientID
+#         self.filename = fullpath
+#         self.PatientID = metadata.PatientID
 
-        # Iteratively load all Points in metadata into dictionary
-        Points = {}
-        i = 0
-        while i < len(metadata.ROIContourSequence):
-            name = Point(metadata, i).Name
-            Points[name] = Point(metadata, i)
-            i += 1
+#         # Iteratively load all Points in metadata into dictionary
+#         Points = {}
+#         i = 0
+#         while i < len(metadata.ROIContourSequence):
+#             name = Point(metadata, i).Name
+#             Points[name] = Point(metadata, i)
+#             i += 1
 
-        self.Earpin = Points.get('Earpin')
-        self.Target = Points.get('Target')
+#         self.Earpin = Points.get('Earpin')
+#         self.Target = Points.get('Target')
 
-        return metadata
+#         return metadata
 
-    def getshift(self):
-        " Calculate spatial shift between target and Earpin"
-        ShiftX = self.Target.coordinates[2] - self.Earpin.coordinates[2]
-        ShiftY = self.Target.coordinates[1] - self.Earpin.coordinates[1]
-        return ShiftX, ShiftY
+#     def getshift(self):
+#         " Calculate spatial shift between target and Earpin"
+#         ShiftX = self.Target.coordinates[2] - self.Earpin.coordinates[2]
+#         ShiftY = self.Target.coordinates[1] - self.Earpin.coordinates[1]
+#         return ShiftX, ShiftY
 
 
 class Point:
@@ -406,130 +406,6 @@ class Crosshair:
         self.visible = False
 
 
-class OverlayImage(QObject):
-    "Class that holds data to allow shifting for positioning"
-    # Define Signals
-#    moved = Signal(int, int)
-
-    def __init__(self):
-        QObject.__init__(self)
-
-        # Allocate variables so they can be written before init method
-        self.Plan = np.array(None)
-        self.Treat = np.array(None)
-        self.Spacing = np.array([None, None])
-
-    def init(self):
-        "Initializes all necessary variables for further calculations"
-        self.Plan_shift = self.Plan
-        self.Treat_shift = self.Treat
-
-        self.Difference = np.subtract(self.Plan.astype(float),
-                                      self.Treat.astype(float))
-
-        self.width = np.shape(self.Plan)[1]
-        self.height = np.shape(self.Plan)[0]
-
-        self.x_shift = 0
-        self.y_shift = 0
-
-    def move(self, direction):
-        "function that returns new imagedata with moved coords"
-
-        y = direction[0]
-        x = direction[1]
-
-        self.x_shift += x
-        self.y_shift += y
-
-
-        # Calculate size of new matrix
-        new_x = self.width + abs(self.x_shift)
-        new_y = self.height + abs(self.y_shift)
-        # ...and allocate this matrix
-        self.Plan_shift = np.zeros((new_y, new_x))
-        self.Treat_shift = np.zeros((new_y, new_x))
-
-        # depending on which direction is moved:
-#        if self.x_shift >= 0   and self.y_shift >= 0:
-#            self.Treat_shift[ :self.height, :self.width] = self.Treat
-#            self.Plan_shift[self.y_shift:,self.x_shift:] = self.Plan
-#
-#        elif self.x_shift < 0  and self.y_shift >= 0:
-#            self.Treat_shift[:self.height, abs(self.x_shift):] = self.Treat
-#            self.Plan_shift[self.y_shift:, :self.width] = self.Plan
-#
-#        elif self.x_shift >= 0 and self.y_shift < 0:
-#            self.Treat_shift[abs(self.y_shift):, :self.width] = self.Treat
-#            self.Plan_shift[:self.height, self.x_shift:] = self.Plan
-#
-#        elif self.x_shift < 0  and self.y_shift < 0:
-#            self.Treat_shift[abs(self.y_shift):, abs(self.x_shift):] = self.Treat
-#            self.Plan_shift[:self.height, :self.width]   = self.Plan
-        # depending on which direction is moved:
-        if self.x_shift >= 0 and self.y_shift >= 0:
-            self.Plan_shift[:self.height, :self.width] = self.Plan
-            self.Treat_shift[self.y_shift:, self.x_shift:] = self.Treat
-
-        elif self.x_shift < 0 and self.y_shift >= 0:
-            self.Plan_shift[:self.height, abs(self.x_shift):] = self.Plan
-            self.Treat_shift[self.y_shift:, :self.width] = self.Treat
-
-        elif self.x_shift >= 0 and self.y_shift < 0:
-            self.Plan_shift[abs(self.y_shift):, :self.width] = self.Plan
-            self.Treat_shift[:self.height, self.x_shift:] = self.Treat
-
-        elif self.x_shift < 0 and self.y_shift < 0:
-            self.Plan_shift[abs(self.y_shift):, abs(self.x_shift):] = self.Plan
-            self.Treat_shift[:self.height, :self.width] = self.Treat
-
-        # get new difference as floating point numbers
-        self.Difference = np.subtract(self.Plan_shift.astype(float),
-                                      self.Treat_shift.astype(float))
-
-        return self.x_shift, self.y_shift
-
-    def get_rgb(self, saturated=0.3):
-        """
-        Returns RGB matrix with shifted colors
-
-        saturated: percentage of pixels that should be saturated (=1)
-        """
-        P = self.Plan_shift
-        T = self.Treat_shift
-
-        RED = (P - np.min(P))/(np.max(P) - np.min(P))
-        GREEN = (T - np.min(T))/(np.max(T) - np.min(T))
-        BLUE = np.zeros(np.shape(RED))
-
-        RGB = np.zeros((np.shape(RED)[0], np.shape(RED)[1], 3))
-        RGB[:, :, 0] = RED
-        RGB[:, :, 1] = GREEN
-        RGB[:, :, 2] = BLUE
-
-        return RGB
-
-    def get_plan(self):
-        "returns shifted data in separate matrices"
-        return self.Plan_shift
-
-    def get_treat(self):
-        "returns shifted data in separate matrices"
-        return self.Treat_shift
-
-    def get_diff(self):
-        "returns difference data"
-        return self.Difference
-
-    def reset(self):
-        "Resets movement from previous commands"
-        self.Plan_shift = self.Plan
-        self.Treat_shift = self.Treat
-
-        self.x_shift = 0
-        self.y_shift = 0
-
-
 class DisplayObject(QWidget):
     """
     Host class for display of images, array storage, etc.
@@ -560,6 +436,18 @@ class DisplayObject(QWidget):
         self.is_moving = False
         self.has_graybar = False
         self.Signals = Signals()
+        
+    def flip(self):
+        """
+        If the image has an overlay, this function will flip foreground and overlay
+        """
+        
+        if not self.has_overlay:
+            return 0
+        
+        self.overlay, self.array = self.array, self.overlay
+        self.display(cmap='gray')
+        return 1
         
     def wipe(self):
         """
@@ -600,7 +488,6 @@ class DisplayObject(QWidget):
         """
         
         self.ImgType = ImgType
-        
         self.n_bins = kwargs.get('n_bins', 100)
         fname, _ = Qfile.getOpenFileName(self.GUI, 'Open file',
                                          "", "(*.tif)")
@@ -624,7 +511,6 @@ class DisplayObject(QWidget):
         self.Qlabel.setText(fname)
 
         logging.info('Successfully imported {:s}'.format(fname))
-        # self.GUI.WindowSelector.setEnabled(True)
         
         # get initial gray-range
         clims = self.canvas.axes.images[0].get_clim()
@@ -707,15 +593,35 @@ class DisplayObject(QWidget):
         """
         
         ax_onoff = kwargs.get('ax_onoff', 'off')
+        cmap = kwargs.get('cmap', 'gray')
+        
+        if self.array is None:
+            return 0
         
         if clear:
             self.canvas.axes.clear()
         self.canvas.axes.axis(ax_onoff)
-        handle = self.canvas.axes.imshow(self.array, origin='lower', **kwargs)
-        self.handle = handle
+        self.handle = self.canvas.axes.imshow(self.array, origin='lower', cmap=cmap)
+        self.set_clim()
         self.canvas.draw()
         self.is_active = True
-        return handle
+        
+        return self.handle
+    
+    def set_clim(self, **kwargs):
+        "Adjuts graywindow of self object if displayed"
+
+        cntr = kwargs.get('cntr', self.CCenter)
+        rng = kwargs.get('rng', self.CRange)
+
+        # CHeck if array has already been provided
+        if self.CCenter == 0 and self.CRange == 0:  
+            return 0
+
+        self.handle.set_clim(cntr - rng/2, cntr + rng/2)
+        self.canvas.draw()
+        
+        return 1
 
     def on_press(self, event):
         """
@@ -777,6 +683,8 @@ class DisplayObject(QWidget):
 
     def toggleOverlay(self):
         'Switches the overlay on and off, provided it exists'
+        if self.array is None:
+            return 0
         if not self.has_overlay:
             return 0
 
@@ -791,20 +699,7 @@ class DisplayObject(QWidget):
             self.canvas.draw()
             self.overlay_active = True
 
-    def set_clim(self, **kwargs):
-        "Adjuts graywindow of self object if displayed"
 
-        cntr = kwargs.get('cntr', self.CCenter)
-        rng = kwargs.get('rng', self.CRange)
-
-        # CHeck if array has already been provided
-        if self.handle is None:
-            return 0
-
-        self.handle.set_clim(cntr - rng/2, cntr + rng/2)
-        self.canvas.draw()
-        
-        return 1
 
     def get_array(self):
         return self.array

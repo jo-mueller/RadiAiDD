@@ -48,8 +48,10 @@ class Registration:
         self.GUI.Button_load_moving.clicked.connect(lambda: self.Moving.load_Image(ImgType="XR"))
         self.GUI.Button_load_fixed.clicked.connect(lambda: self.Fixed.load_Image(ImgType="RG"))
 
-        # Control for overlay function
-        # self.GUI.Button_toggleOverlay.clicked.connect(self.toggleOverlay)
+        # Control for overlay functions
+        self.GUI.Button_flip_layers.clicked.connect(self.Moving.flip)
+        self.GUI.Button_show_Atlas.clicked.connect(self.Moving.toggleOverlay)
+        self.GUI.Button_show_Atlas.clicked.connect(self.WarpedMoving.toggleOverlay)
 
         # Buttons for default marker positions
         self.GUI.Button_default_moving.clicked.connect(
@@ -240,15 +242,15 @@ class Registration:
         if self.Moving.has_overlay:
             self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x, self.Fixed.array)
             self.WarpedMoving.has_overlay = True
+        
+        # Take colorlimits from input images, these have probably bene optimized
+        self.WarpedMoving.CCenter, self.WarpedMoving.CRange = self.Moving.CCenter, self.Moving.CRange
+        self.WarpedFixed.CCenter, self.WarpedFixed.CRange = self.Fixed.CCenter, self.Fixed.CRange
+        self.WarpedMoving.display(alpha=0.5, interpolation='nearest')
+        self.WarpedFixed.display(alpha=0.5, clear=False, interpolation='nearest')
 
-        self.WarpedMoving.display(alpha=0.5, interpolation='nearest',
-                                  cmap='gray')
-        self.WarpedFixed.display(alpha=0.5, clear=False,
-                                 interpolation='nearest', cmap='gray')
-
-        # Transform target coordinates.
-        # A target may not have been defined yet. Throws ValueError if no
-        # target is known
+        # Transform target coordinates. A target may not have been defined yet. 
+        # Throws ValueError if no target is known
         try:
             coords = self.GUI.table_TrgCoords.item(0, 0).text().split(",")
             r = self.f([np.array(coords).astype(np.float32)], res.x)[0]
