@@ -71,7 +71,7 @@ class Log(object):
     def __init__(self):
 
         self.LogDir = os.path.join(os.getcwd(), 'LogFiles')
-        if not os.path.isdir(self.LogDir):
+        if not os.path.exists(self.LogDir):
             os.mkdir(self.LogDir)
 
         # make default place for logfile
@@ -243,7 +243,7 @@ if __name__=="__main__":
     GUI.setStyleSheet(open(stylefile, "r").read())
     GUI.show()
 
-    # initialize subunctions
+    # initialize subfunctions
     Logger = Log()
     Radiography = Radiography(GUI, Checklist)
     Motor = MotorControl(GUI)
