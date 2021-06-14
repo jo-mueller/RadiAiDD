@@ -204,7 +204,7 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
         # Calculate fit function values
         try:
             popt, pcov = find_center(subset, x, y, sigma=5.0)
-            logging.info('Detected coordinates for earpin:'
+            logging.info('Detected coordinates for isocenter:'
                          'x = {:2.1f}, y = {:2.1f}'.format(popt[1], popt[2]))
         except Exception:
             logging.error('Autodetection of Landmark in ROI failed.')

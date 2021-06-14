@@ -87,7 +87,7 @@ class Log(object):
                             filemode='a',
                             format='%(asctime)s, %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
-                            level=logging.CRITICAL)
+                            level=logging.INFO)
 
         self.initTextLogger()
 
@@ -104,7 +104,7 @@ class Log(object):
         logTextBox.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
         logging.getLogger().addHandler(logTextBox)
         # You can control the logging level
-        logging.getLogger().setLevel(logging.CRITICAL)
+        logging.getLogger().setLevel(logging.INFO)
 
         # Add the new logging box widget to the layout
         GUI.LogBox.addWidget(logTextBox.widget)
@@ -114,7 +114,7 @@ class Log(object):
 
         # Remove unnecessary logs from matlotlib
         mpl_logger = logging.getLogger('matplotlib')
-        mpl_logger.setLevel(logging.CRITICAL)
+        mpl_logger.setLevel(logging.INFO)
 
     def LogLevelInfo(self):
 
@@ -188,15 +188,18 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
         
         # Workflow steps
         self.IsoCenterState = StateSign(self.SS_IsoCenter,
-                                        ['Isocenter\nnot set', 'Isocenter\nset'])
+                                        ['Isocenter\nnot set', 'Isocenter\nset'],
+                                        loglvl='info')
         self.PlanImageState = StateSign(self.SS_PlanImage,
                                         ['Plan\nImage', 'Plan\nImage'])
         self.TreatImageState = StateSign(self.SS_TreatImage,
                                          ['Treatment\nImage', 'Plan\nImage'])
         self.RegistrationState = StateSign(self.SS_RegApproved,
-                                           ['Registration', 'Registration'])
+                                           ['Registratio\nunconfirmed', 'Registration\nconfirmed'],
+                                        loglvl='info')
         self.StageState = StateSign(self.SS_StageSet,
-                                    ['Stage set', 'Stage set'])
+                                    ['Stage not set', 'Stage set'],
+                                        loglvl='info')
         
         # create workflow
         self.Workflow = Workflow()

@@ -35,11 +35,13 @@ class Signals(QObject):
 
 
 class StateSign:
-    def __init__(self, HostFrame, TextStates):
+    def __init__(self, HostFrame, TextStates, **kwargs):
         """
         var QObj: text label object for status display
         var TextStates: array (len 2) with labels for display in treu/false state
         """
+
+        self.loglvl = kwargs.get('loglvl', 'debug')
 
         # QFrame hosts the label for the state sign
         self.QFrame = HostFrame
@@ -67,12 +69,19 @@ class StateSign:
         self.QFrame.setStyleSheet( "background-color: #DF362D;")
         self.state = False
         self.Signals.state_down.emit()
+        
+        if self.loglvl == 'info':
+            logging.info('{:s}'.format(self.dict_states['off']))
 
     def flag_up(self):
         self.QText.setText(self.dict_states['on'])
         self.QFrame.setStyleSheet( "background-color: #18A558;")
         self.state = True
         self.Signals.state_up.emit()
+        
+        if self.loglvl == 'info':
+            logging.info('{:s}'.format(self.dict_states['on']))
+        
 
     def toggle(self):
         "changes the state from one to another"
@@ -81,6 +90,7 @@ class StateSign:
         else:
             self.flag_up()
         self.Signals.state_changed.emit(self.state)
+        logging.info('Status was changed to {:s}'.format(self.dict_states['on']))
 
 
 class DragPoint(QWidget):
