@@ -6,8 +6,8 @@ Created on Wed Aug 19 20:08:38 2020
 """
 import logging
 import numpy as np
-import cv2
 import os
+from skimage.transform import SimilarityTransform, warp
 
 from PyQt5.QtWidgets import QPushButton
 
@@ -226,7 +226,7 @@ class Registration:
 
         # Transform and display warped/fixed image
         # Allocate new display Object(s) for this purpose
-        self.WarpedMoving.array = self.ImageTransform(self.Moving.array, res.x)
+        self.WarpedMoving.array = self.ImageTransform(self.Moving.array, res.x, self.Fixed.array)
         self.WarpedFixed.array = self.Fixed.array
         
         # # disconnect previous links between Images and Warped Counterparts
@@ -238,7 +238,7 @@ class Registration:
 
         # If there's an overlay, transform this as well
         if self.Moving.has_overlay:
-            self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x)
+            self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x, self.Fixed.array)
             self.WarpedMoving.has_overlay = True
 
         self.WarpedMoving.display(alpha=0.5, interpolation='nearest',
@@ -285,9 +285,9 @@ class Registration:
         #     lambda: self.WarpedMoving.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
         # self.Fixed.Signals.changing_clims.connect(
         #     lambda: self.WarpedFixed.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
+        
 
-
-    def ImageTransform(self, Img, params):
+    def ImageTransform(self, Img, params, OutImg):
         """
         Function for similarity transform of given input Image
         Input:
@@ -295,24 +295,20 @@ class Registration:
             params: vector (length 4) with transformation parameters
                 r (scaling factor), angle (rotation angle) t_1 and t_2
                 (translation vector)
+            OutImg: Target image. Required to know correct dimensions for output image
         Returns:
             nd-Image array
         """
-        
     
-        rows, cols = np.shape(Img)[0], np.shape(Img)[1]
+        # get transformation params
         r, alpha, t1, t2 = params
-        alpha = - alpha*180/(np.pi)  # convert to degree
-        A = cv2.getRotationMatrix2D((0, 0), alpha, 1.0)
-        # A[0][2] = t1
-        # A[1][2] = t2
-        T = np.float32([[1.0, 0.0, t1], [0.0, 1.0, t2]])
+        
+        # Apply params to coordinate matrices
+        trafo = SimilarityTransform(matrix=None, scale=r, rotation=alpha,
+                                    translation=[t1, t2])
 
-        Img = cv2.warpAffine(Img, A, (cols, rows))
-        Img = cv2.resize(Img, None, fx=r, fy=r, interpolation=cv2.INTER_CUBIC)
-        Img = cv2.warpAffine(Img, T, (cols, rows))
 
-        return Img
+        return warp(Img, trafo.inverse, output_shape=OutImg.shape)
 
     def adjust_alpha(self):
         """
