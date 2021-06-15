@@ -2221,6 +2221,7 @@ set</string>
      <string>Utils</string>
     </property>
     <addaction name="action_scan_COM_ports"/>
+    <addaction name="actionN2V_for_RG"/>
    </widget>
    <addaction name="menuActions"/>
    <addaction name="menuOptions"/>
@@ -2278,6 +2279,11 @@ set</string>
   <action name="action_scan_COM_ports">
    <property name="text">
     <string>Rescan COM ports</string>
+   </property>
+  </action>
+  <action name="actionN2V_for_RG">
+   <property name="text">
+    <string>Noise2Void for Radiography</string>
    </property>
   </action>
  </widget>

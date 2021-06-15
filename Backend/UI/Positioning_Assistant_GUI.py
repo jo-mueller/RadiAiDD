@@ -1050,6 +1050,8 @@ class Ui_Mouse_Positioning_Interface(object):
         self.actionSet_Logfile_Directory.setObjectName("actionSet_Logfile_Directory")
         self.action_scan_COM_ports = QtWidgets.QAction(Mouse_Positioning_Interface)
         self.action_scan_COM_ports.setObjectName("action_scan_COM_ports")
+        self.actionN2V_for_RG = QtWidgets.QAction(Mouse_Positioning_Interface)
+        self.actionN2V_for_RG.setObjectName("actionN2V_for_RG")
         self.menuActions.addAction(self.action_Exit)
         self.menuLog_Level.addAction(self.action_LogLevel_Info)
         self.menuLog_Level.addAction(self.action_LogLevel_Debug)
@@ -1057,6 +1059,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.menuOptions.addAction(self.action_Log_Serial_Com)
         self.menuOptions.addAction(self.actionSet_Logfile_Directory)
         self.menuUtils.addAction(self.action_scan_COM_ports)
+        self.menuUtils.addAction(self.actionN2V_for_RG)
         self.menuBar.addAction(self.menuActions.menuAction())
         self.menuBar.addAction(self.menuOptions.menuAction())
         self.menuBar.addAction(self.menuUtils.menuAction())
@@ -1211,6 +1214,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.action_Log_Serial_Com.setText(_translate("Mouse_Positioning_Interface", "Log Serial Com"))
         self.actionSet_Logfile_Directory.setText(_translate("Mouse_Positioning_Interface", "Set Logfile Directory"))
         self.action_scan_COM_ports.setText(_translate("Mouse_Positioning_Interface", "Rescan COM ports"))
+        self.actionN2V_for_RG.setText(_translate("Mouse_Positioning_Interface", "Noise2Void for Radiography"))
 
 from matplotlibwidgetFile import matplotlibWidget
 import ressources_rc
