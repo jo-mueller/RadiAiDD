@@ -1,100 +1,53 @@
-<<<<<<< HEAD
 # RadiAID
 
-Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
+Latest version of an interface that's used to set up mice for high-precision proton irradiation based on registration of three necessary image sources:
+- Detector image (*radiography*) of collimated beam shape
+- 2D Planning projection image which shows target structure
+- Beam-site radiography of target structure (e.g. small animal) of region of interest.
 
-### Setup
-You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual).
+## Setup
 
-# Additional packages:
-RadiAID requires a few python packages that don't come with the anaconda distribution. To download and install new packages, install anaconda and launch the anaconda command line. You can do this in two ways. You can either open the console through the windows start menu 
-![](./imgs/launch_prompt1.png)
-or through the Anaconda interface. For the second option, start anaconda and navigate to the ''Environments'' tab. Click the green triangle next to ''root'' and then click ''open terminal'' 
-![](./imgs/launch_prompt2.png)
+### Python
+You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual). Through anaconda, you can download all necesary packages with pip: ```pip install -r requirements.txt```
 
-Onco you started the anaconda command prompt, you will have to install/update the following packages:
-* PySerial: type the following to install
-        conda install -c anaconda pyserial
-* PyDicom
 
-### 1. How to run:
+### How to run:
 
-* Go to folder with Positioning_AssistantMAIN.py (presumably the one you are at right now)
-* click into addressline
-* type "cmd" and hit Enter
-* in console, type "python Positioning_AssistantMAIN.py", the programm will then start
+RadiAIDD is currently not packaed as batch file, so you can run RadiAIDD either through the anaconda console:
+```python  Main.py``` or by opening ```Main.py``` in the Spyder Editor and running the script (F5)
 
-### 2. Necessary Input
-* .dcm Lynx image of Collimator for IsoCenter definition
-* .dcm Lynx image of Bed with Earpins in Transport Box
-* RS [...].dcm RT struct file that holds CT-based plan information ("structure set")
-* .dcm Planar X-Ray image (angle: 90degree) from Planning day
-* .dcm Planar X-Ray image (angle: 90degree) from Treatment day
-* A good spirit! :)
+### Necessary Input
+As written above, you'll need these data input sources:
+* .tif Lynx image of Collimator for IsoCenter definition
+* .tif Planing image of animal. Stack images are supported for 2 layers.
+* .tif Treatment radiography image of animal
 
-### 3. Bug handling
+## Workflow
+The workflow is as follows.
+
+1. Define the beam isocenter. Navigate to the *Radiography* tab (top left) and click ![Define](/imgs/Define_button.PNG). In the opening IsoCenter definition window, load the image of the collimated beam spot and draw rectangle around it. It should look somehow like this:
+![IsoCenter](/imgs/IsoCenter.PNG)
+Note: You **have** to click the Lock-button to confirm the detection of the isocenter.
+
+2. Load Plan and treatment image: For this, head to the *active positioning* tab and load the respective images. You can change the grayscales by moving the mouse over the image, *middle-mouse click* and drag the mouse. When you are happy with the display, proceed to registration.
+3. Registration: Click *Set default landmarks* for both images and drag the appearing dots (you can change their sizes with the sliders below) to corresponding locations in both images. Click *run Registration* to display the resulting image transformation. The image overlay will show the same grayscale as the input images. The result should look somewhat like this:
+![AcceptedRegistration](/imgs/Accepted_registration.PNG)
+Use the slider below the overlay images to flip back and forth between planing and treatment image.
+
+4. Target definition: In the *target coordinates* field, click the *Get* button to place the target marker in a random location in the plan image. If available, you can use the *Show atlas* button to display any provided overlays of the image. It may happen that, after loading the plan image, you will see only the atlas, and not the actual image. If this is the case, use the *Flip Image* button to exchange image and overlay. Drag&drop the target marker to your desired location in the planing image and click *run Registration* again to project the target coordinates into the treatment image. When you're good to go, click *Accept Registration*. 
+
+5. Motor control: to be written
+
+This gif shows the entire workflow: ![Workflow](/imgs/Workflow.gif)
+
+## Bug handling & known issues
 * if unexpected behaviour occurrs: please report!
-* Coordinate addition was currently only tested without repositioning Scan!
-* Make sure that you load correct planar images; programm becomes buggy when files are loaded on top of old one
-    Better: Close and start again
+* If Planing image is loaded and not correctly display, try the *flip* button!
+* Motor stability: RadiAIDD has crashed a couple of times randomly when adressing the motor stages through RadiAIDD - will be investigated and fixed in future releases.
 
-### 4. Logfile
-A Logfile can be exported that saves all sorts of stuff. 
-The default location for the creation of the logfile is in the directory of the program itself.
-
-### 5. Citations
+## Citations
 If you use this software, please cite the following publications:
 
 Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
 
 Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205–212 (2020).
-=======
-# RadiAide
-
-Latest stable version of an interface that's used to set up mice for high-precision proton irradiation based on a previously performed CT scan and a delineated target structure. Relies on proton radiographic images for on-site image-guidance.
-
-### Setup
-You'll need a bit of stuff to set up RadiAide and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual).
-
-#### Additional packages:
-RadiAide requires a few python packages that don't come with the anaconda distribution. To download and install new packages, install anaconda and launch the anaconda command line. You can do this in two ways. You can either open the console through the windows start menu 
-![](./imgs/launch_prompt1.png)
-or through the Anaconda interface. For the second option, start anaconda and navigate to the ''Environments'' tab. Click the green triangle next to ''root'' and then click ''open terminal'' 
-![](./imgs/launch_prompt2.png)
-
-Onco you started the anaconda command prompt, you will have to install/update the following packages:
-* PySerial: type the following to install: `conda install -c anaconda pyserial`
-* PyDicom: type the following to install: `conda install -c conda-forge pydicom`
-
-### 1. How to run:
-
-* Go to folder with Positioning_AssistantMAIN.py (presumably the one you are at right now)
-* click into addressline
-* type "cmd" and hit Enter
-* in console, type "python Positioning_AssistantMAIN.py", the programm will then start
-
-### 2. Necessary Input
-* .dcm Lynx image of Collimator for IsoCenter definition
-* .dcm Lynx image of Bed with Earpins in Transport Box
-* RS [...].dcm RT struct file that holds CT-based plan information ("structure set")
-* .dcm Planar X-Ray image (angle: 90degree) from Planning day
-* .dcm Planar X-Ray image (angle: 90degree) from Treatment day
-* A good spirit! :)
-
-### 3. Bug handling
-* if unexpected behaviour occurrs: please report!
-* Coordinate addition was currently only tested without repositioning Scan!
-* Make sure that you load correct planar images; programm becomes buggy when files are loaded on top of old one
-    Better: Close and start again
-
-### 4. Logfile
-A Logfile can be exported that saves all sorts of stuff. 
-The default location for the creation of the logfile is in the directory of the program itself.
-
-### 5. Citations
-If you use this software, please cite the following publications:
-
-Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
-
-Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205–212 (2020).
->>>>>>> dev
