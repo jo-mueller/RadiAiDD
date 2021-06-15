@@ -17,10 +17,15 @@ from PyQt5.QtWidgets import QToolBar
 from PyQt5.QtWidgets import QLabel
 
 import numpy as np
-import pydicom as dicom
 import traceback
 import tifffile
 import logging
+from scipy import ndimage
+import os
+
+from n2v.models import N2V
+# do not show warnings from tensorflow
+os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
 
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
@@ -551,22 +556,67 @@ class DisplayObject(QWidget):
             self.GUI.TreatImageState.flag_up()
             self.GUI.TreatImageState.Signals.state_down.connect(self.wipe)
         
-        
-    def proc_on_import(self, **kwargs):
-        """
-        Does some processing of the image upon import
+    def eliminate_dead_pixel(self, train_image):
+        """ function that searches for extrem pixel values in the image, recognises them and median filter them
         """
         
+        # quantile(A, 0.02) gives a pixel value of the image which cuts the tail of the normal distribution.
+        idx_map = (train_image < np.quantile(train_image, 0.02)) + (train_image > np.quantile(train_image, 0.98))   # map of true and false values
+        
+        # median filtered image 
+        train_image_median = ndimage.median_filter(train_image, size=3)
+ 
+        #replace certain values of og image with median values of median image 
+        train_image[idx_map] = train_image_median[idx_map]
+    
+        return train_image
+    
+    
+    
+    def apply_n2v_model(self, image):
+        # model name of our trained model
+        model_name = 'n2v'
+        # directory where model name can be found
+        basedir = os.getcwd()  
+        model = N2V(config=None, name=model_name, basedir=basedir)
+        
+        # We load the data we want to process - single images
+        pred_train = model.predict(image, axes='YX', n_tiles=(2,1))
+
+        return pred_train    
+        
+    def proc_on_import(self, image, **kwargs):
+        """
+        Does some preprocessing of the image upon import
+        """
+        
+        # options
         do_zeropadding = kwargs.get('zeropadding', False)
         do_N2V_filtering = kwargs.get('N2V', False)
+        do_normalization = kwargs.get('normalize', True)
+        norm_range = kwargs.get('norm_range', 256)
         
+        logging.info('Preprocessing input:')
+        
+        # Eliminate dead pixels and remove noise (only applicable for radiographic data)
+        if self.ImgType == 'RG' and do_N2V_filtering:
+            logging.info('\tN2V filtering')
+            image = self.eliminate_dead_pixel(image)
+            image = self.apply_n2v_model(image)        
+        
+        # normalize gray-range
+        if do_normalization:
+            logging.info('\tGrayrange normalization')
+            image = self.normalize(image, norm_range)
+            
         # zero padding
         if do_zeropadding:
+            logging.info('\tZeropadding')
+            self.array = self.zeropadding(self.array, 1032, 1012)
             if self.has_overlay:
-                self.array = self.zeropadding(self.array, 1032, 1012)
                 self.overlay = self.zeropadding(self.overlay, 1032, 1012)
-            else:
-                self.array = self.zeropadding(self.array, 1032, 1012)
+                
+        return image
     
     def disconnect(self):
         self.canvas.mpl_disconnect(self.cidpress)

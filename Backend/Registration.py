@@ -8,8 +8,11 @@ import logging
 import numpy as np
 import os
 from skimage.transform import SimilarityTransform, warp
+import tifffile as ti               # tiff file commands
 
 from PyQt5.QtWidgets import QPushButton
+
+from PyQt5.QtWidgets import QToolBar
 
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
