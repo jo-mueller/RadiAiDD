@@ -1,6 +1,7 @@
-pyserial >= 3.5
-pydicom >= 2.1.2
-tqdm >= 4.59.0
-qt >= 5.9.7
-python >= 3.8.10
-skimage == 0.18.0
+pyserial>=3.5
+pydicom>=2.1.2
+tqdm>=4.59.0
+qt>=5.9.7
+python==3.8.10
+skimage==0.18.0
+scipy==1.6.3
