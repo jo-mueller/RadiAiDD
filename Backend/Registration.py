@@ -8,7 +8,7 @@ import logging
 import numpy as np
 import os
 from skimage.transform import SimilarityTransform, warp
-import tifffile as ti               # tiff file commands
+# import tifffile as ti               # tiff file commands
 
 from PyQt5.QtWidgets import QPushButton
 

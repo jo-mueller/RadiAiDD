@@ -23,9 +23,9 @@ import logging
 from scipy import ndimage
 import os
 
-from n2v.models import N2V
-# do not show warnings from tensorflow
-os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
+# from n2v.models import N2V
+# # do not show warnings from tensorflow
+# os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
 
 from matplotlib.lines import Line2D
 from matplotlib.patches import Circle
