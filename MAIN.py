@@ -7,6 +7,7 @@ from Backend.Radiography import Radiography
 from Backend.MotorControl import MotorControl
 from Backend.Containers import StateSign
 from Backend.Containers import Check
+from Backend.Report import Report
 
 import ctypes
 
@@ -208,6 +209,7 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
         self.Workflow.add_step(self.TreatImageState)
         self.Workflow.add_step(self.RegistrationState)
         self.Workflow.add_step(self.StageState)
+    
 
 
     def closeEvent(self, event):
@@ -251,4 +253,5 @@ if __name__=="__main__":
     Radiography = Radiography(GUI, Checklist)
     Motor = MotorControl(GUI)
     Reg = Registration(GUI)
+    Report = Report(GUI)
     app.exec_()
