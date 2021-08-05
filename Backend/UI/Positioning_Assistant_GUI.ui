@@ -22,7 +22,7 @@
   <property name="minimumSize">
    <size>
     <width>1708</width>
-    <height>0</height>
+    <height>916</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -2254,6 +2254,7 @@ set</string>
     </property>
     <addaction name="action_scan_COM_ports"/>
     <addaction name="actionN2V_for_RG"/>
+    <addaction name="action_set_beam_diameter"/>
    </widget>
    <addaction name="menuActions"/>
    <addaction name="menuOptions"/>
@@ -2316,6 +2317,11 @@ set</string>
   <action name="actionN2V_for_RG">
    <property name="text">
     <string>Noise2Void for Radiography</string>
+   </property>
+  </action>
+  <action name="action_set_beam_diameter">
+   <property name="text">
+    <string>Set Beam Diameter</string>
    </property>
   </action>
  </widget>

@@ -11,8 +11,7 @@ from skimage.transform import SimilarityTransform, warp
 # import tifffile as ti               # tiff file commands
 
 from PyQt5.QtWidgets import QPushButton
-
-from PyQt5.QtWidgets import QToolBar
+from PyQt5.QtWidgets import QInputDialog
 
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
@@ -33,6 +32,9 @@ class Registration:
         self.Btn_get_raw_trg.setText('Get')
         self.GUI.table_TrgCoords.setCellWidget(0, 1, self.Btn_get_raw_trg)
         self.Btn_get_raw_trg.clicked.connect(self.get_raw_target)
+        
+        # Connect Beam Size action from dropdown
+        self.GUI.action_set_beam_diameter.triggered.connect(self.setBeamDiameter)
 
         # Allocate Display objects
         self.Moving = DisplayObject(self.GUI.Display_Moving.canvas,
@@ -81,6 +83,8 @@ class Registration:
         # List of landmarks and default coordinates
         self.LM_moving = []
         self.LM_fixed = []
+        self.BeamDiameter = 4  # mm diameter
+        self.PlanPxSize = 0.1  # mm pixel size Plan
 
         # Flags
         self.PointsOnCanvas_moving = False
@@ -161,11 +165,30 @@ class Registration:
         self.GUI.Box_MotorOriginY.setValue(y)
         logging.info("Current motor position: (x={:.2f}, y={:.2f}"
                      .format(x, y))
+        
+    def setBeamDiameter(self):
+        
+        "Opens a dialogue that allows setting the beam diameter"
+        
+        self.PlanPxSize, okx = QInputDialog.getDouble(self.GUI, 'Pixel size',
+                                            'pixel size (mm):', 0.1, decimals=2)
+        
+        self.BeamDiameter, okx = QInputDialog.getDouble(self.GUI, 'Beam Size',
+                                         'Collimator diameter (mm):', 4,decimals=1)
+        
+        # If a target already exists, remove old one
+        if self.TrgRaw is not None:
+            radius = (self.BeamDiameter/2.0)/self.PlanPxSize
+            self.TrgRaw.setSize(radius)
 
     def get_raw_target(self):
         """
-        Identify coordinates of target from supplied mask file
+        Add the beam spot to the plan image.
+        This function will try to identify the target coordinates from
+        the filename. If that doesn't work, a default coordinate (image center)
+        is used.'
         """
+        
         fname = self.GUI.Label_Moving.text()
         if fname == "":
             return 0
@@ -193,8 +216,10 @@ class Registration:
             center = np.asarray(self.Moving.array.shape)/2
             x, y = center[1], center[0]
 
+        # Draw spot on canvas
+        radius = (self.BeamDiameter/2.0)/self.PlanPxSize 
         self.TrgRaw = DragPoint(self.GUI.Display_Moving, x=x, y=y,
-                                transparent=True, size=30/2.0)
+                                transparent=True, size=radius)
         self.GUI.table_TrgCoords.item(0, 0).setText("{:.0f}, {:.0f}"
                                                     .format(x, y))
         self.TrgRaw.Signal.moving.connect(self.updateRawTarget)

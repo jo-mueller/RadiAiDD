@@ -18,7 +18,7 @@ class Ui_Mouse_Positioning_Interface(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Mouse_Positioning_Interface.sizePolicy().hasHeightForWidth())
         Mouse_Positioning_Interface.setSizePolicy(sizePolicy)
-        Mouse_Positioning_Interface.setMinimumSize(QtCore.QSize(1708, 0))
+        Mouse_Positioning_Interface.setMinimumSize(QtCore.QSize(1708, 916))
         Mouse_Positioning_Interface.setMaximumSize(QtCore.QSize(16777215, 16777215))
         Mouse_Positioning_Interface.setAutoFillBackground(False)
         Mouse_Positioning_Interface.setStyleSheet("")
@@ -1063,6 +1063,8 @@ class Ui_Mouse_Positioning_Interface(object):
         self.action_scan_COM_ports.setObjectName("action_scan_COM_ports")
         self.actionN2V_for_RG = QtWidgets.QAction(Mouse_Positioning_Interface)
         self.actionN2V_for_RG.setObjectName("actionN2V_for_RG")
+        self.action_set_beam_diameter = QtWidgets.QAction(Mouse_Positioning_Interface)
+        self.action_set_beam_diameter.setObjectName("action_set_beam_diameter")
         self.menuActions.addAction(self.action_Exit)
         self.menuLog_Level.addAction(self.action_LogLevel_Info)
         self.menuLog_Level.addAction(self.action_LogLevel_Debug)
@@ -1071,6 +1073,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.menuOptions.addAction(self.actionSet_Logfile_Directory)
         self.menuUtils.addAction(self.action_scan_COM_ports)
         self.menuUtils.addAction(self.actionN2V_for_RG)
+        self.menuUtils.addAction(self.action_set_beam_diameter)
         self.menuBar.addAction(self.menuActions.menuAction())
         self.menuBar.addAction(self.menuOptions.menuAction())
         self.menuBar.addAction(self.menuUtils.menuAction())
@@ -1227,6 +1230,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.actionSet_Logfile_Directory.setText(_translate("Mouse_Positioning_Interface", "Set Logfile Directory"))
         self.action_scan_COM_ports.setText(_translate("Mouse_Positioning_Interface", "Rescan COM ports"))
         self.actionN2V_for_RG.setText(_translate("Mouse_Positioning_Interface", "Noise2Void for Radiography"))
+        self.action_set_beam_diameter.setText(_translate("Mouse_Positioning_Interface", "Set Beam Diameter"))
 
 from matplotlibwidgetFile import matplotlibWidget
 import ressources_rc
