@@ -8,7 +8,7 @@ Can create pdf reports for finalized radiations
 """
 
 import os
-import fpdf
+# import fpdf
 import matplotlib.pyplot as plt
 import logging
 from datetime import datetime
