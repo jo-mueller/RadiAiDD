@@ -9,15 +9,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1700</width>
+    <width>1708</width>
     <height>916</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1708</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="maximumSize">
    <size>
@@ -399,7 +405,7 @@ set</string>
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="TabRadiography">
        <attribute name="title">
@@ -2217,7 +2223,7 @@ set</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1700</width>
+     <width>1708</width>
      <height>21</height>
     </rect>
    </property>

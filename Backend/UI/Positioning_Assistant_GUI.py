@@ -12,12 +12,13 @@ class Ui_Mouse_Positioning_Interface(object):
     def setupUi(self, Mouse_Positioning_Interface):
         Mouse_Positioning_Interface.setObjectName("Mouse_Positioning_Interface")
         Mouse_Positioning_Interface.setEnabled(True)
-        Mouse_Positioning_Interface.resize(1700, 916)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Preferred)
+        Mouse_Positioning_Interface.resize(1708, 916)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Mouse_Positioning_Interface.sizePolicy().hasHeightForWidth())
         Mouse_Positioning_Interface.setSizePolicy(sizePolicy)
+        Mouse_Positioning_Interface.setMinimumSize(QtCore.QSize(1708, 0))
         Mouse_Positioning_Interface.setMaximumSize(QtCore.QSize(16777215, 16777215))
         Mouse_Positioning_Interface.setAutoFillBackground(False)
         Mouse_Positioning_Interface.setStyleSheet("")
@@ -1028,7 +1029,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.statusbar.setObjectName("statusbar")
         Mouse_Positioning_Interface.setStatusBar(self.statusbar)
         self.menuBar = QtWidgets.QMenuBar(Mouse_Positioning_Interface)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1700, 21))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1708, 21))
         self.menuBar.setObjectName("menuBar")
         self.menuActions = QtWidgets.QMenu(self.menuBar)
         self.menuActions.setObjectName("menuActions")
@@ -1075,7 +1076,7 @@ class Ui_Mouse_Positioning_Interface(object):
         self.menuBar.addAction(self.menuUtils.menuAction())
 
         self.retranslateUi(Mouse_Positioning_Interface)
-        self.Registration.setCurrentIndex(0)
+        self.Registration.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(Mouse_Positioning_Interface)
 
     def retranslateUi(self, Mouse_Positioning_Interface):
