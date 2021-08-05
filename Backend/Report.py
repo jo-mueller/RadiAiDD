@@ -12,9 +12,9 @@ import os
 import matplotlib.pyplot as plt
 import logging
 from datetime import datetime
-import traceback
 
-# def create_report
+from PyQt5.QtWidgets import QFileDialog as QFile
+from PyQt5.QtWidgets import QApplication
 
 class Report:
     def __init__(self, GUI, **kwargs):
@@ -26,10 +26,8 @@ class Report:
             os.mkdir(self.dir)
         
         
-        self.sample = kwargs.get('name', 'Default_name')
+        self.sample = kwargs.get('name', 'Report')
         self.outdir = os.path.join(self.dir, datetime.now().strftime('%y%m%d_%H%M%S_') + self.sample)
-        if not os.path.isdir(self.outdir):
-            os.mkdir(self.outdir)
         
         # self.report = FPDF()
         # self.report.add_page()
@@ -39,21 +37,24 @@ class Report:
         self.GUI.Button_create_report.clicked.connect(self.create_Report)
         
     def save_image(self, widget, fname):
-        
+        "Saves an image from a widget"
         fname = os.path.join(self.outdir, fname)
-        widget.canvas.axes.figure.savefig(fname, dpi=150)
-        
+        widget.canvas.axes.figure.savefig(fname, dpi=150)        
     
     def create_Report(self, **kwargs):
         
         x_iso = kwargs.get('x_iso', self.GUI.SpotTxt_x.text())
         y_iso = kwargs.get('y_iso', self.GUI.SpotTxt_y.text())
         f_iso = kwargs.get('f_iso', self.GUI.Text_RG_Filename_IsoCenter.toPlainText())
-        # x_Trg = kwargs.get('x_Trg', 0)
-        # y_Trg = kwargs.get('y_Trg', 0)
         
-        f_report = os.path.join(self.outdir, 'report.txt')
-        self.f = open(f_report, 'wt')
+        path = QFile.getExistingDirectory(self.GUI, "Choose Report Directory")
+        
+        if not path:
+            return 0
+        else:
+            self.outdir = path
+            f_report = os.path.join(self.outdir, 'report.txt')
+            self.f = open(f_report, 'wt')
         
         # =============================================================================
         #       Isocenter stuff
@@ -69,11 +70,20 @@ class Report:
         [self.f.write(x + '\n') for x in lines]
         
         # =============================================================================
+        #         Screenshot
+        # =============================================================================
+        screen = QApplication.primaryScreen()
+        screenshot = screen.grabWindow( self.GUI.winId())
+        screenshot.save(os.path.join(self.outdir, 'Screenshot.jpg'), 'jpg')
+        
+        
+        # =============================================================================
         #         Registration stuff
         # =============================================================================
         
         self.save_image(self.GUI.Display_Moving, 'Plan_image.png')
         self.save_image(self.GUI.Display_Fixed, 'Treatment_image.png')
+        self.save_image(self.GUI.Display_Fusion, 'Image_Overlay.png')
         
         lines = []
         lines.append('\nRegistration info:')
