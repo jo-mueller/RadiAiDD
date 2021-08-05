@@ -188,7 +188,7 @@ class Registration:
 
         if x == "":
             center = np.asarray(self.Moving.array.shape)/2
-            x, y = center[0], center[1]
+            x, y = center[1], center[0]
 
         self.TrgRaw = DragPoint(self.GUI.Display_Moving, x=x, y=y,
                                 transparent=True, size=30/2.0)
@@ -374,7 +374,7 @@ class Registration:
             if self.Moving.array is None:
                 return 0
             else:
-                x0, y0 = self.Moving.array.shape[0]//2, self.Moving.array.shape[1]//2
+                x0, y0 = self.Moving.array.shape[1]//2, self.Moving.array.shape[0]//2
                 self.default_moving = [[x0 + x0/10*np.cos(x),
                                         y0 + y0/10*np.sin(x)] for x in range(5)]
             
@@ -382,7 +382,7 @@ class Registration:
             if self.Fixed.array is None:
                 return 0
             else:
-                x0, y0 = self.Fixed.array.shape[0]//2, self.Fixed.array.shape[1]//2
+                x0, y0 = self.Fixed.array.shape[1]//2, self.Fixed.array.shape[0]//2
                 self.default_fixed = [[x0 + x0/10*np.cos(x),
                                        y0 + y0/10*np.sin(x)] for x in range(5)]  
 
