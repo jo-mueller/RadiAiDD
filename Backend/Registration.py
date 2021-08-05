@@ -43,6 +43,9 @@ class Registration:
                                           None)
         self.WarpedFixed = DisplayObject(self.GUI.Display_Fusion.canvas,
                                          None)
+        
+        self.GUI.PlanImageState.Signals.state_down.connect(self.WarpedMoving.wipe)
+        self.GUI.PlanImageState.Signals.state_down.connect(self.WarpedFixed.wipe)
 
         # graybar
         self.Moving.assign_graybar(self.GUI.Graybar_Moving)

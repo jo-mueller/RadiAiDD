@@ -479,14 +479,15 @@ class DisplayObject(QWidget):
         self.overlay = None
         self.handle = None
         
-        # destroy connection to statesign
+        # destroy connection to statesign after being called once
         if self.ImgType == 'XR':
             self.GUI.PlanImageState.state_down.disconnect(self.wipe)
         elif self.ImgType == 'RG':
             self.GUI.TreatImageState.state_down.discconnect(self.wipe)
         
         # destroy file reference
-        self.Qlabel.setText('')
+        if self.Qlabel is not None:
+            self.Qlabel.setText('')
         
         if self.has_graybar:
             self.GBWidget.canvas.axes.clear()
@@ -549,6 +550,8 @@ class DisplayObject(QWidget):
         self.connect()
         
         # Send state to Workflow
+        # This switches the respective workflow step's state and connects
+        # the wipe function, which is called as soon a new image is loaded
         if ImgType == 'XR':
             self.GUI.PlanImageState.flag_up()
             self.GUI.PlanImageState.Signals.state_down.connect(self.wipe)
@@ -570,7 +573,6 @@ class DisplayObject(QWidget):
         train_image[idx_map] = train_image_median[idx_map]
     
         return train_image
-    
     
     
     def apply_n2v_model(self, image):
