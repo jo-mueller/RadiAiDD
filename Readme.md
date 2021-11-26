@@ -1,5 +1,5 @@
 # RadiAID
-[![tests](https://github.com/jo-mueller/RadiAiDD/workflows/tests/badge.svg)](https://github.com/jo-mueller/RadiAiDD/actions)
+[![test](https://github.com/jo-mueller/RadiAiDD/actions/workflows/test.yml/badge.svg)](https://github.com/jo-mueller/RadiAiDD/actions/workflows/test.yml)
 
 Latest version of an interface that's used to set up mice for high-precision proton irradiation based on registration of three necessary image sources:
 - Detector image (*radiography*) of collimated beam shape
