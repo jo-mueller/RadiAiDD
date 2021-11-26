@@ -1,4 +1,5 @@
 # RadiAID
+[![tests](https://github.com/jo-mueller/RadiAiDD/workflows/tests/badge.svg)](https://github.com/jo-mueller/RadiAiDD/actions)
 
 Latest version of an interface that's used to set up mice for high-precision proton irradiation based on registration of three necessary image sources:
 - Detector image (*radiography*) of collimated beam shape
@@ -7,14 +8,25 @@ Latest version of an interface that's used to set up mice for high-precision pro
 
 ## Setup
 
-### Python
-You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual). Through anaconda, you can download all necesary packages with pip: ```pip install -r requirements.txt```
+If you do not yet have the Anaconda Python package manager, get it [here](https://www.anaconda.com/products/individual). After installing, open an anaconda command prompt:
+![screenshot_1](https://user-images.githubusercontent.com/38459088/143623993-f3cb9842-c067-47f4-acfa-5fbbf9d25dcb.png)
 
+In the command prompt, create a new environment for RadiAIDD:
+```
+conda create -n RadiAIDD
+conda activate  RadiAIDD
+```
 
-### How to run:
+Install `git` and `pip` in this environment:
+```conda install pip git```
 
-RadiAIDD is currently not packaed as batch file, so you can run RadiAIDD either through the anaconda console:
-```python  Main.py``` or by opening ```Main.py``` in the Spyder Editor and running the script (F5)
+Now, create a new directory for RadiAIDD. Move into this directory and download + install this repository using
+```
+git clone https://github.com/jo-mueller/RadiAiDD.git
+pip install -e .
+```
+
+Lastly, you can run RadiAIDD by simply typing `RadiAIDD`  in the command line.
 
 ### Necessary Input
 As written above, you'll need these data input sources:
