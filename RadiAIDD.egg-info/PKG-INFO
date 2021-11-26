@@ -1,0 +1,78 @@
+Metadata-Version: 2.1
+Name: RadiAIDD
+Version: 0.1
+Summary: Positioning aid to align projected CT images and on-beam radiographic images
+Home-page: https://github.com/jo-mueller/RadiAiDD.git
+Author: Johannes Müller
+Author-email: johannes_richard.mueller@tu-dresden.de
+License: BSD-3-Clause
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Topic :: Software Development :: Testing
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: BSD License
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# RadiAID
+
+Latest version of an interface that's used to set up mice for high-precision proton irradiation based on registration of three necessary image sources:
+- Detector image (*radiography*) of collimated beam shape
+- 2D Planning projection image which shows target structure
+- Beam-site radiography of target structure (e.g. small animal) of region of interest.
+
+## Setup
+
+### Python
+You'll need a bit of stuff to set up RadiAID and get it running. Most noteably, that should be Python 3, it's recommended to use the Anaconda distribution for a quick and easy setup. If you don't have it, get it [here](https://www.anaconda.com/products/individual). Through anaconda, you can download all necesary packages with pip: ```pip install -r requirements.txt```
+
+
+### How to run:
+
+RadiAIDD is currently not packaed as batch file, so you can run RadiAIDD either through the anaconda console:
+```python  Main.py``` or by opening ```Main.py``` in the Spyder Editor and running the script (F5)
+
+### Necessary Input
+As written above, you'll need these data input sources:
+* .tif Lynx image of Collimator for IsoCenter definition
+* .tif Planing image of animal. Stack images are supported for 2 layers.
+* .tif Treatment radiography image of animal
+
+## Workflow
+The workflow is as follows.
+
+1. Define the beam isocenter. Navigate to the *Radiography* tab (top left) and click ![Define](/imgs/Define_button.PNG). In the opening IsoCenter definition window, load the image of the collimated beam spot and draw rectangle around it. It should look somehow like this:
+![IsoCenter](/imgs/IsoCenter.PNG)
+Note: You **have** to click the Lock-button to confirm the detection of the isocenter.
+
+2. Load Plan and treatment image: For this, head to the *active positioning* tab and load the respective images. You can change the grayscales by moving the mouse over the image, *middle-mouse click* and drag the mouse. When you are happy with the display, proceed to registration.
+3. Registration: Click *Set default landmarks* for both images and drag the appearing dots (you can change their sizes with the sliders below) to corresponding locations in both images. Click *run Registration* to display the resulting image transformation. The image overlay will show the same grayscale as the input images. The result should look somewhat like this:
+![AcceptedRegistration](/imgs/Accepted_registration.PNG)
+Use the slider below the overlay images to flip back and forth between planing and treatment image.
+
+4. Target definition: In the *target coordinates* field, click the *Get* button to place the target marker in a random location in the plan image. If available, you can use the *Show atlas* button to display any provided overlays of the image. It may happen that, after loading the plan image, you will see only the atlas, and not the actual image. If this is the case, use the *Flip Image* button to exchange image and overlay. Drag&drop the target marker to your desired location in the planing image and click *run Registration* again to project the target coordinates into the treatment image. When you're good to go, click *Accept Registration*. 
+
+5. Motor control: to be written
+
+This gif shows the entire workflow: ![Workflow](/imgs/Workflow.gif)
+
+## Bug handling & known issues
+* if unexpected behaviour occurrs: please report!
+* If Planing image is loaded and not correctly display, try the *flip* button!
+* Motor stability: RadiAIDD has crashed a couple of times randomly when adressing the motor stages through RadiAIDD - will be investigated and fixed in future releases.
+
+## Citations
+If you use this software, please cite the following publications:
+
+Müller, J. et al. Proton radiography for inline treatment planning and positioning verification of small animals. Acta Oncol. (Madr). 56, 1399–1405 (2017).
+
+Suckert, T. et al. High-precision image-guided proton irradiation of mouse brain sub-volumes. Radiother. Oncol. 146, 205–212 (2020).
+
+

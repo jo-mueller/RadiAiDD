@@ -10,14 +10,14 @@ import numpy as np
 
 from PyQt5.QtWidgets import QMessageBox as QMessage
 
-from Backend.Containers import Crosshair
-from Backend.Children import IsoCenter_Child as IsoCenter
+from RadiAIDD.Backend.Containers import Crosshair
+from RadiAIDD.Backend.Children import IsoCenter_Child as IsoCenter
 # from Backend.Children import Landmark_Child as Landmark
 
 
 class Radiography(object):
     def __init__(self, GUI, Checklist):
-        
+
         self.GUI = GUI
         self.Checklist = Checklist
 
@@ -80,7 +80,7 @@ class Radiography(object):
                 self.Checklist.IsoCenter = False
             else:
                 return 0
-            
+
         # set state down just to be sure here
         self.GUI.IsoCenterState.flag_down()
 
@@ -246,7 +246,7 @@ class Radiography(object):
     def return_isocenter(self, RadiographyImg, xy):
         """Function to be invoked from child window that passes IsoCenter
         coordinates to main window"""
-        
+
         self.IsoCenterImg = RadiographyImg
         x_iso = xy[0]
         y_iso = xy[1]
@@ -279,7 +279,7 @@ class Radiography(object):
             crosshair[0].setup(crosshair[1], size=5, x=x_iso, y=y_iso,
                                text='IsoCenter', zorder=3,
                                color='blue', circle=True)
-            
+
         # Write this to statesign
         self.GUI.IsoCenterState.toggle()
 

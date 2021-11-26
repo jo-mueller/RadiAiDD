@@ -15,8 +15,8 @@ from PyQt5.QtWidgets import QInputDialog
 
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-from Backend.Containers import DragPoint
-from Backend.Containers import DisplayObject
+from RadiAIDD.Backend.Containers import DragPoint
+from RadiAIDD.Backend.Containers import DisplayObject
 
 ccycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
@@ -32,7 +32,7 @@ class Registration:
         self.Btn_get_raw_trg.setText('Get')
         self.GUI.table_TrgCoords.setCellWidget(0, 1, self.Btn_get_raw_trg)
         self.Btn_get_raw_trg.clicked.connect(self.get_raw_target)
-        
+
         # Connect Beam Size action from dropdown
         self.GUI.action_set_beam_diameter.triggered.connect(self.setBeamDiameter)
 
@@ -45,7 +45,7 @@ class Registration:
                                           None)
         self.WarpedFixed = DisplayObject(self.GUI.Display_Fusion.canvas,
                                          None)
-        
+
         self.GUI.PlanImageState.Signals.state_down.connect(self.WarpedMoving.wipe)
         self.GUI.PlanImageState.Signals.state_down.connect(self.WarpedFixed.wipe)
 
@@ -165,17 +165,17 @@ class Registration:
         self.GUI.Box_MotorOriginY.setValue(y)
         logging.info("Current motor position: (x={:.2f}, y={:.2f}"
                      .format(x, y))
-        
+
     def setBeamDiameter(self):
-        
+
         "Opens a dialogue that allows setting the beam diameter"
-        
+
         self.PlanPxSize, okx = QInputDialog.getDouble(self.GUI, 'Pixel size',
                                             'pixel size (mm):', 0.1, decimals=2)
-        
+
         self.BeamDiameter, okx = QInputDialog.getDouble(self.GUI, 'Beam Size',
                                          'Collimator diameter (mm):', 4,decimals=1)
-        
+
         # If a target already exists, remove old one
         if self.TrgRaw is not None:
             radius = (self.BeamDiameter/2.0)/self.PlanPxSize
@@ -188,7 +188,7 @@ class Registration:
         the filename. If that doesn't work, a default coordinate (image center)
         is used.'
         """
-        
+
         fname = self.GUI.Label_Moving.text()
         if fname == "":
             return 0
@@ -217,7 +217,7 @@ class Registration:
             x, y = center[1], center[0]
 
         # Draw spot on canvas
-        radius = (self.BeamDiameter/2.0)/self.PlanPxSize 
+        radius = (self.BeamDiameter/2.0)/self.PlanPxSize
         self.TrgRaw = DragPoint(self.GUI.Display_Moving, x=x, y=y,
                                 transparent=True, size=radius)
         self.GUI.table_TrgCoords.item(0, 0).setText("{:.0f}, {:.0f}"
@@ -261,7 +261,7 @@ class Registration:
         # Allocate new display Object(s) for this purpose
         self.WarpedMoving.array = self.ImageTransform(self.Moving.array, res.x, self.Fixed.array)
         self.WarpedFixed.array = self.Fixed.array
-        
+
         # # disconnect previous links between Images and Warped Counterparts
         # try:
         #     self.Moving.Signals.changing_clims.disconnect(self.WarpedMoving.set_clim)
@@ -273,14 +273,14 @@ class Registration:
         if self.Moving.has_overlay:
             self.WarpedMoving.overlay = self.ImageTransform(self.Moving.overlay, res.x, self.Fixed.array)
             self.WarpedMoving.has_overlay = True
-        
+
         # Take colorlimits from input images, these have probably bene optimized
         self.WarpedMoving.CCenter, self.WarpedMoving.CRange = self.Moving.CCenter, self.Moving.CRange
         self.WarpedFixed.CCenter, self.WarpedFixed.CRange = self.Fixed.CCenter, self.Fixed.CRange
         self.WarpedMoving.display(alpha=0.5, interpolation='nearest')
         self.WarpedFixed.display(alpha=0.5, clear=False, interpolation='nearest')
 
-        # Transform target coordinates. A target may not have been defined yet. 
+        # Transform target coordinates. A target may not have been defined yet.
         # Throws ValueError if no target is known
         try:
             coords = self.GUI.table_TrgCoords.item(0, 0).text().split(",")
@@ -312,13 +312,13 @@ class Registration:
             self.sliderconnected = True
 
         self.ImageOnFusion = True
-        
+
         # # After registration, forward clim-change of input images to overlay
         # self.Moving.Signals.changing_clims.connect(
         #     lambda: self.WarpedMoving.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
         # self.Fixed.Signals.changing_clims.connect(
         #     lambda: self.WarpedFixed.set_clim(cntr=self.Moving._CCenter, rng=self.Moving._CRange))
-        
+
 
     def ImageTransform(self, Img, params, OutImg):
         """
@@ -332,10 +332,10 @@ class Registration:
         Returns:
             nd-Image array
         """
-    
+
         # get transformation params
         r, alpha, t1, t2 = params
-        
+
         # Apply params to coordinate matrices
         trafo = SimilarityTransform(matrix=None, scale=r, rotation=alpha,
                                     translation=[t1, t2])
@@ -392,11 +392,11 @@ class Registration:
         return np.sqrt(np.sum(np.power(np.subtract(x1, x2), 2)))
 
     def setDefaultPositions(self, which):
-        
+
         """
         Draw some default registration markers on the canvas
         """
-        
+
         # First check if there is an image to begin with
         if which == "moving":
             if self.Moving.array is None:
@@ -405,14 +405,14 @@ class Registration:
                 x0, y0 = self.Moving.array.shape[1]//2, self.Moving.array.shape[0]//2
                 self.default_moving = [[x0 + x0/10*np.cos(x),
                                         y0 + y0/10*np.sin(x)] for x in range(5)]
-            
+
         elif which == 'fixed':
             if self.Fixed.array is None:
                 return 0
             else:
                 x0, y0 = self.Fixed.array.shape[1]//2, self.Fixed.array.shape[0]//2
                 self.default_fixed = [[x0 + x0/10*np.cos(x),
-                                       y0 + y0/10*np.sin(x)] for x in range(5)]  
+                                       y0 + y0/10*np.sin(x)] for x in range(5)]
 
         # process calls to markers on moving image
         if which == "moving":

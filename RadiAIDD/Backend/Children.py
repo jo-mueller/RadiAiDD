@@ -9,8 +9,8 @@ import pydicom as dcm
 import scipy.optimize as opt
 import matplotlib
 
-from Backend.Containers import RadiographyImage
-from Backend.UI import IsoCenter5 as IsoCenter
+from RadiAIDD.Backend.Containers import RadiographyImage
+from RadiAIDD.Backend.UI import IsoCenter5 as IsoCenter
 # import Backend.UI.Landmark5 as Landmark
 
 from PyQt5 import QtGui
@@ -388,7 +388,7 @@ class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
 #         self.canvas.draw()
 #         self.calcspacing()  # recalculate spacing with new image
 #         logging.info('{:s} imported as Isocenter Radiography'.format(fname))
-        
+
 #         self.gettablecoords()  # get motor coordinates for this image
 
 #     def gettablecoords(self):
