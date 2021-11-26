@@ -22,7 +22,7 @@ from PyQt5.QtCore import QRunnable
 from PyQt5.QtCore import QObject
 from PyQt5.QtWidgets import QMessageBox as QMessage
 
-from Backend.Containers import StateSign
+from RadiAIDD.Backend.Containers import StateSign
 
 
 class Signals(QObject):
@@ -32,7 +32,7 @@ class Signals(QObject):
     arrived = pyqtSignal()
     calibrated = pyqtSignal(bool)
     State = pyqtSignal(object)
-        
+
 
 class StatusWatchdog(QRunnable):
     """This thread is continuosly running in the background of the GUI and
@@ -186,7 +186,7 @@ class MotorControl(object):
 
     def __init__(self, GUI):
 
-        self.GUI = GUI        
+        self.GUI = GUI
 
         # Variables
         self.pos = []  # Unit: mm
@@ -401,7 +401,7 @@ class MotorControl(object):
         function that executes everything that is necessary to initialize
         the motor
         """
-        
+
         # Before first: Pause Status WatchDog
         self.StatusWatchDog.Pause()
 
@@ -421,7 +421,7 @@ class MotorControl(object):
 
         # Find Slaves
         self.find_slaves(10)
-        
+
         print(self.MasterID)
         print(self.SlaveID)
 

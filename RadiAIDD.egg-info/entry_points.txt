@@ -1,0 +1,5 @@
+{
+"gui_scripts": [
+"RadiAIDD = RadiAIDD.__main__:main"
+]
+}
