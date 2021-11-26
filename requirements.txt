@@ -67,7 +67,7 @@ paramiko==2.7.2
 parso==0.7.0
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==8.3.1
+Pillow==8.3.2
 pip==21.2.2
 pluggy==0.13.1
 poyo==0.5.0
