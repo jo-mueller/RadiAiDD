@@ -1232,5 +1232,5 @@ class Ui_Mouse_Positioning_Interface(object):
         self.actionN2V_for_RG.setText(_translate("Mouse_Positioning_Interface", "Noise2Void for Radiography"))
         self.action_set_beam_diameter.setText(_translate("Mouse_Positioning_Interface", "Set Beam Diameter"))
 
-from matplotlibwidgetFile import matplotlibWidget
+from RadiAIDD.Backend.UI._matplotlibwidgetFile import matplotlibWidget
 import ressources_rc

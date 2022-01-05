@@ -234,7 +234,7 @@ class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
 def run():
 
     root = os.getcwd()
-    stylefile = os.path.join(root, 'RadiAIDD', 'Backend', 'Style', 'stylefile.qss')
+    stylefile = os.path.join(root, 'Backend', 'Style', 'stylefile.qss')
 
     # Assign Checklist
     Checklist = Check()
@@ -267,3 +267,6 @@ def run():
     GUI.add_app(app)
 
     app.exec_()
+
+if __name__ == "__main__":
+    run()
