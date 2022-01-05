@@ -2329,7 +2329,7 @@ set</string>
   <customwidget>
    <class>matplotlibWidget</class>
    <extends>QWidget</extends>
-   <header>matplotlibwidgetFile</header>
+   <header>./RadiAIDD/Backend/UI/_matplotlibwidgetFile</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
