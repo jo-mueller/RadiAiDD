@@ -37,20 +37,20 @@ As written above, you'll need these data input sources:
 ## Workflow
 The workflow is as follows.
 
-1. Define the beam isocenter. Navigate to the *Radiography* tab (top left) and click ![Define](/imgs/Define_button.PNG). In the opening IsoCenter definition window, load the image of the collimated beam spot and draw rectangle around it. It should look somehow like this:
-![IsoCenter](/imgs/IsoCenter.PNG)
+1. Define the beam isocenter. Navigate to the *Radiography* tab (top left) and click ![Define](https://github.com/jo-mueller/RadiAiDD/raw/master/RadiAIDD/imgs/Define_button.PNG). In the opening IsoCenter definition window, load the image of the collimated beam spot and draw rectangle around it. It should look somehow like this:
+![IsoCenter](https://github.com/jo-mueller/RadiAiDD/raw/master/RadiAIDD/imgs/IsoCenter.PNG)
 Note: You **have** to click the Lock-button to confirm the detection of the isocenter.
 
 2. Load Plan and treatment image: For this, head to the *active positioning* tab and load the respective images. You can change the grayscales by moving the mouse over the image, *middle-mouse click* and drag the mouse. When you are happy with the display, proceed to registration.
 3. Registration: Click *Set default landmarks* for both images and drag the appearing dots (you can change their sizes with the sliders below) to corresponding locations in both images. Click *run Registration* to display the resulting image transformation. The image overlay will show the same grayscale as the input images. The result should look somewhat like this:
-![AcceptedRegistration](/imgs/Accepted_registration.PNG)
+![AcceptedRegistration](https://github.com/jo-mueller/RadiAiDD/raw/master/RadiAIDD/imgs/Accepted_registration.PNG?raw=true)
 Use the slider below the overlay images to flip back and forth between planing and treatment image.
 
 4. Target definition: In the *target coordinates* field, click the *Get* button to place the target marker in a random location in the plan image. If available, you can use the *Show atlas* button to display any provided overlays of the image. It may happen that, after loading the plan image, you will see only the atlas, and not the actual image. If this is the case, use the *Flip Image* button to exchange image and overlay. Drag&drop the target marker to your desired location in the planing image and click *run Registration* again to project the target coordinates into the treatment image. When you're good to go, click *Accept Registration*. 
 
 5. Motor control: to be written
 
-This gif shows the entire workflow: ![Workflow](/imgs/Workflow.gif)
+This gif shows the entire workflow: ![Workflow](https://github.com/jo-mueller/RadiAiDD/raw/master/RadiAIDD/imgs/Workflow.gif)
 
 ## Bug handling & known issues
 * if unexpected behaviour occurrs: please report!
