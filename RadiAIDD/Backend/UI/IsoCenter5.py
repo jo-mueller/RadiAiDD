@@ -92,7 +92,7 @@ class Ui_IsoCenter(object):
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         IsoCenter.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(IsoCenter)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 937, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 937, 21))
         self.menubar.setObjectName("menubar")
         IsoCenter.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(IsoCenter)
@@ -114,4 +114,4 @@ class Ui_IsoCenter(object):
         self.label_6.setText(_translate("IsoCenter", "y_Spot="))
         self.Button_Done.setText(_translate("IsoCenter", "Done"))
 
-from matplotlibwidgetFile import matplotlibWidget
+from RadiAIDD.Backend.UI._matplotlibwidgetFile import matplotlibWidget

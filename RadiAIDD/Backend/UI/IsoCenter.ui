@@ -200,7 +200,7 @@
      <x>0</x>
      <y>0</y>
      <width>937</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
@@ -210,7 +210,7 @@
   <customwidget>
    <class>matplotlibWidget</class>
    <extends>QWidget</extends>
-   <header>matplotlibwidgetFile</header>
+   <header>./RadiAIDD/Backend/UI/_matplotlibwidgetFile</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
