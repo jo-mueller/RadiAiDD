@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-from RadiAIDD.Backend.UI.Positioning_Assistant_GUI import Ui_Mouse_Positioning_Interface
 from RadiAIDD.Backend.Registration import Registration
 from RadiAIDD.Backend.Radiography import Radiography
 from RadiAIDD.Backend.MotorControl import MotorControl
@@ -14,6 +10,7 @@ import ctypes
 import logging
 import sys
 import os
+from pathlib import Path
 from datetime import datetime
 
 
@@ -24,6 +21,8 @@ from PyQt5.QtWidgets import QFileDialog as Qfile
 from PyQt5.QtWidgets import QMainWindow as QMain
 import PyQt5.QtWidgets as QtWidgets
 pyqt_version = 5
+
+from qtpy import uic
 
 class Workflow:
     """
@@ -179,15 +178,16 @@ class QTextEditLogger(logging.Handler):
 """
   Klasse zur Beschreibung der Graphischen Benutzeroberfläche
 """
-class MainWindow(QMain, Ui_Mouse_Positioning_Interface):
+class MainWindow(QMain):
     """
       Initialisierung Graphischer Benutzeroberfläche
     """
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
 
         #Initialize GUI and load stylesheet
-        self.setupUi(self)
+        uic.loadUi(os.path.join(Path(__file__).parent, 'Backend', 'UI',
+                                'Positioning_Assistant_GUI.ui'), self)
 
         # Workflow steps
         self.IsoCenterState = StateSign(self.SS_IsoCenter,
@@ -249,7 +249,7 @@ def run():
     # Create App-ID: Otherwise, the software's icon will not display propperly.
     appid = 'OncoRay.Preclinical.RadiAiDD'  # for TaskManager
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
-    app.setWindowIcon(QtGui.QIcon('/RadiAIDD/Backend/UI/Icons/Icon_3.png'))
+    app.setWindowIcon(QtGui.QIcon('./RadiAIDD/Backend/UI/Icons/Icon_3.png'))
 
     # Create GUI + Logo and Style
     GUI = MainWindow()

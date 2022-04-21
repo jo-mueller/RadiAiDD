@@ -10,7 +10,6 @@ import scipy.optimize as opt
 import matplotlib
 
 from RadiAIDD.Backend.Containers import RadiographyImage
-from RadiAIDD.Backend.UI import IsoCenter5 as IsoCenter
 # import Backend.UI.Landmark5 as Landmark
 
 from PyQt5 import QtGui
@@ -23,19 +22,24 @@ from PyQt5.QtCore import Qt
 import PyQt5.QtCore as QtCore
 from PyQt5.QtWidgets import QInputDialog
 
+from qtpy import uic
+from pathlib import Path
+import os
+
 
 ''''''''''''''''''''''''
 """ISOCENTER -Dialogue"""
 ''''''''''''''''''''''''
 
-class IsoCenter_Child(QMain, IsoCenter.Ui_IsoCenter):
+class IsoCenter_Child(QMain):
     "Class that contains subroutines to define isocenter from Lynx image"
 
     def __init__(self, parent, owner):
-        super(IsoCenter_Child, self).__init__()
+        super(self).__init__()
+
+        uic.loadUi(os.path.join(Path(__file__).parent, 'UI', 'IsoCenter.ui'), self)
 
         self.Owner = owner
-        self.setupUi(self)
         self.setStyleSheet(parent.styleSheet())
 
         self.parent = parent
@@ -580,5 +584,3 @@ def array2mesh(array):
         logging.debug(traceback.print_exc())
 
     return xx, yy, xrange, yrange
-
-
