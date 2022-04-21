@@ -1,5 +1,0 @@
-scikit-image
-pydicom
-pyserial
-tqdm
-matplotlib
