@@ -26,7 +26,7 @@ git clone https://github.com/jo-mueller/RadiAiDD.git
 pip install -e .
 ```
 
-Lastly, you can run RadiAIDD by simply typing `RadiAIDD`  in the command line.
+Lastly, you can run RadiAIDD by simply typing `radiaidd`  in the command line.
 
 ### Necessary Input
 As written above, you'll need these data input sources:
@@ -46,7 +46,7 @@ Note: You **have** to click the Lock-button to confirm the detection of the isoc
 ![AcceptedRegistration](https://github.com/jo-mueller/RadiAiDD/raw/master/RadiAIDD/imgs/Accepted_registration.PNG?raw=true)
 Use the slider below the overlay images to flip back and forth between planing and treatment image.
 
-4. Target definition: In the *target coordinates* field, click the *Get* button to place the target marker in a random location in the plan image. If available, you can use the *Show atlas* button to display any provided overlays of the image. It may happen that, after loading the plan image, you will see only the atlas, and not the actual image. If this is the case, use the *Flip Image* button to exchange image and overlay. Drag&drop the target marker to your desired location in the planing image and click *run Registration* again to project the target coordinates into the treatment image. When you're good to go, click *Accept Registration*. 
+4. Target definition: In the *target coordinates* field, click the *Get* button to place the target marker in a random location in the plan image. If available, you can use the *Show atlas* button to display any provided overlays of the image. It may happen that, after loading the plan image, you will see only the atlas, and not the actual image. If this is the case, use the *Flip Image* button to exchange image and overlay. Drag&drop the target marker to your desired location in the planing image and click *run Registration* again to project the target coordinates into the treatment image. When you're good to go, click *Accept Registration*.
 
 5. Motor control: to be written
 

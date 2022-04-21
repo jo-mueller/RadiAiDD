@@ -233,8 +233,9 @@ class MainWindow(QMain):
 
 def run():
 
-    root = os.getcwd()
-    stylefile = os.path.join(root, 'Backend', 'Style', 'stylefile.qss')
+    path = Path(__file__).parent
+    stylefile = os.path.join(path, 'Backend', 'Style', 'stylefile.qss')
+    radiaidd_icon = os.path.join(path, 'Backend', 'UI', 'Icons', 'Icon_3.png')
 
     # Assign Checklist
     Checklist = Check()
@@ -249,7 +250,7 @@ def run():
     # Create App-ID: Otherwise, the software's icon will not display propperly.
     appid = 'OncoRay.Preclinical.RadiAiDD'  # for TaskManager
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(appid)
-    app.setWindowIcon(QtGui.QIcon('./RadiAIDD/Backend/UI/Icons/Icon_3.png'))
+    app.setWindowIcon(QtGui.QIcon(radiaidd_icon))
 
     # Create GUI + Logo and Style
     GUI = MainWindow()
