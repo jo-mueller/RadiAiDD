@@ -1,3 +1,0 @@
-[gui_scripts]
-RadiAiDD = RadiAIDD:run
-
