@@ -35,7 +35,7 @@ class IsoCenter_Child(QMain):
     "Class that contains subroutines to define isocenter from Lynx image"
 
     def __init__(self, parent, owner):
-        super(self).__init__()
+        super().__init__()
 
         uic.loadUi(os.path.join(Path(__file__).parent, 'UI', 'IsoCenter.ui'), self)
 
